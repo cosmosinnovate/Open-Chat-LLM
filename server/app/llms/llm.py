@@ -79,7 +79,7 @@ class LLMService:
         Generate chat using different model providers.
 
         Args:
-            model_provider (str): Provider of the model (e.g., 'ollama', 'openai')
+            model_provider (str): Provider of the model (e.g., 'llama3.2', 'openai')
             model_name (str): Name of the model to use
             messages (list): List of message dictionaries with 'role' and 'content'
 

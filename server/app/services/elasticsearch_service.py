@@ -2,7 +2,7 @@ import os
 from elasticsearch import Elasticsearch
 import logging
 import hashlib
-from datetime import datetime
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +112,7 @@ class ElasticsearchService:
             doc_body = {
                 "content": cleaned_content,
                 "embedding": embedding,
-                "timestamp": datetime.now(datetime.timezone.utc).isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
             logger.info(f"Document body keys: {doc_body.keys()}")

@@ -15,7 +15,7 @@ import CallToActionItems from '../component/CTA';
 import ChatMessages from '../component/ChatMessageList';
 import TopMenu from '../component/TopMenu';
 import ChatBox from '../component/ChatBox';
-import { MessageSquareTextIcon } from 'lucide-react';
+import { MessageSquareText, MessageSquareTextIcon } from 'lucide-react';
 
 const MainChat: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -145,7 +145,7 @@ const MainChat: React.FC = () => {
 
         try {
 
-            
+
             // switch (selectedChatService) {
             //     case 'llama3.2':
             //         response = await fetch(`${baseURL}/chats`, {
@@ -161,7 +161,7 @@ const MainChat: React.FC = () => {
             //     default:
             //         throw new Error(`Unknown chat service: ${selectedChatService}`);
             // }
-   
+
             const response = await fetch(`${baseURL}/chats`, {
                 method: 'POST',
                 headers: {
@@ -369,12 +369,12 @@ const MainChat: React.FC = () => {
 
             {/* Main content */}
             <div className="flex-1 flex flex-col items-center w-full h-full transition-all duration-300 ease-in-out">
-                
+
                 {/* TopMenu  */}
                 <TopMenu toggleMenu={toggleMenu} />
 
                 {/* Chat content */}
-                <main className="content ml-[250px] mt-[60px] p-[20px] h-[calc(100vh-60px)] pb-[100px] transition-all duration-300 ease-in-out">
+                <main className="content ml-[250px] mt-[60px] p-[20px]  mb-[160px] transition-all duration-300 ease-in-out">
                     <div className={`flex flex-col items-center w-full h-full  transition-all duration-300 ease-in-out`}>
                         <div className={`font-semibold text-[32px] text-center ${messages.length > 0 ? 'hidden' : 'block'}`}>
                             Unlocking the Potential of Organizational Wisdom
@@ -385,22 +385,31 @@ const MainChat: React.FC = () => {
                         <div className="flex flex-1">
                             <div className="flex flex-col space-y-10 justify-items-end w-full">
                                 {/* Chat messages */}
-                                {isLoading && (
-                                    <div className="flex items-start p-4">
-                                        <div className="flex flex-col flex-grow">
-                                            <div className="text-gray-700"></div>
-                                            <MessageSquareTextIcon />
+                                <ChatMessages messages={messages} markdownComponents={markdownComponents} />
+
+                                {messages.length > 0 &&
+                                    <div className="flex justify-center items-center w-full rounded-full">
+                                        <div className="flex items-center justify-center p-2 px-4 bg-white rounded-full border border-gray-300 shadow-md" onClick={() => {
+                                            navigate('/new')
+                                            setMessages([])
+                                        }
+                                        }>
+                                            <MessageSquareText color="gray" size={24} />
+                                            <p>
+                                                New Conversation
+                                            </p>
                                         </div>
                                     </div>
-                                )}
-                                <ChatMessages messages={messages} markdownComponents={markdownComponents} />
+                                }
                                 <div ref={messagesEndRef} />
+
                             </div>
 
                         </div>
                     </div>
 
                 </main>
+
 
                 {/* Chat box*/}
                 <ChatBox

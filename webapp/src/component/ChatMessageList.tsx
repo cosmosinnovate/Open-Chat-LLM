@@ -44,7 +44,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({ messages, markdo
   );
 
   return (
-    <div className="flex md:w-[830px] flex-col pb-40 justify-items-end overflow-auto" ref={messageListRef}>
+    <div className="flex md:w-[830px] flex-col justify-items-end overflow-auto" ref={messageListRef}>
       {messages.map(renderMessage)}
     </div>
   );

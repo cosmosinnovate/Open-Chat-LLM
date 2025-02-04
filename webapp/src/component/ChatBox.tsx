@@ -13,6 +13,8 @@ interface ChatBoxProps {
 const ChatBox: FC<ChatBoxProps> = ({ inputValue, setInputValue, isLoading, handleAbort, handleSubmit, abortControllerRef }) => {
     return <div className={`chat-box fixed left-[250px] right-0 bottom-0 bg-white px-[20px] flex gap-[10px] z-[4] transition-all duration-300 ease-in-out  pb-10`}>
         <form onSubmit={handleSubmit} className={`flex flex-col items-center shadow-sm bg-[#F5F5F5] rounded-xl w-full md:w-[900px] mx-auto p-[15px]`}>
+
+            
             <textarea
                 value={inputValue}
                 onChange={(e) => {

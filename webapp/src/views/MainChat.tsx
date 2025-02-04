@@ -6,17 +6,16 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SideMenu from '../component/SideMenu';
 import userAssistant from '../assets/userAssistant.png';
-import uploadFile from '../assets/load-file.png';
-import sendMessage from '../assets/send-message.png';
 import { baseURL } from '../service';
 import { RootState } from '../store';
 import { useAppSelector } from '../hooks';
 import { Message } from '../features/chat/chatSlice';
 import { useNavigate, useParams } from 'react-router-dom';
-import { LLMModels } from '../util/model';
+import { LLMModels } from '../util/ai_model';
 import CallToActionItems from '../component/CTA';
 import ChatMessages from '../component/ChatMessages';
-
+import TopMenu from '../component/TopMenu';
+import ChatBox from '../component/ChatBox';
 
 const MainChat: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -26,7 +25,7 @@ const MainChat: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<null | HTMLDivElement>(null);
     const abortControllerRef = useRef<AbortController | null>(null);
-    const [selectedChatService, setSelectedChatService] = useState<LLMModels>('ollama');
+    const [selectedChatService, setSelectedChatService] = useState<LLMModels>('llama3.2');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [copiedCode, setCopiedCode] = useState('');
     const navigate = useNavigate()
@@ -90,6 +89,20 @@ const MainChat: React.FC = () => {
         loadData();
     }, [chatId, fetchChats]);
 
+
+    // figure out if the window is small and then set isSidebarOpen to true
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 1024) {
+                setIsSidebarOpen(false);
+            }
+        };
+
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const updateChat = useCallback(async () => {
         try {
             const response = await fetch(`${baseURL}/chats/${chatId}`, {
@@ -134,7 +147,7 @@ const MainChat: React.FC = () => {
 
             let response: Response;
             switch (selectedChatService) {
-                case 'ollama':
+                case 'llama3.2':
                     response = await fetch(`${baseURL}/chats`, {
                         method: 'POST',
                         headers: {
@@ -312,7 +325,7 @@ const MainChat: React.FC = () => {
     };
 
     const handleSelectedChatService = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedChatService(event.target.value as 'ollama' | 'bedrock');
+        setSelectedChatService(event.target.value as 'llama3.2' | 'deepseek-r1');
     };
 
     const handleSubmitCustom = (messageContent: string) => {
@@ -329,21 +342,29 @@ const MainChat: React.FC = () => {
         }
     };
 
-    return (
-        <div className="flex flex-col h-screen transition-all duration-300">
-            <div className="flex-1 flex flex-row">
-                {/* SideMenu remains fixed but with modified width handling */}
-                <SideMenu
-                    selectedChatService={selectedChatService}
-                    handleSelectedChatService={handleSelectedChatService}
-                    isOpen={isSidebarOpen}
-                    toggleMenu={toggleSidebar}
-                />
+    const toggleMenu = () => {
+        document.body.classList.toggle('sidebar-collapsed');
+    }
 
-                {/* Main content area */}
-                <main className={`flex-1 flex flex-col items-center mx-auto transition-all duration-300 ease-in-out ${isSidebarOpen ? 'ml-64' : 'ml-12' // Adjust margin based on sidebar state
-                    }`}>
-                    <div className="flex w-full flex-col">
+    return (
+        <div className="flex flex-row">
+
+            {/* SideMenu*/}
+            <SideMenu
+                selectedChatService={selectedChatService}
+                handleSelectedChatService={handleSelectedChatService}
+                isOpen={isSidebarOpen}
+                toggleMenu={toggleSidebar}
+            />
+
+            {/* Main content */}
+            <div className="flex-1 flex flex-col items-center w-full h-full">
+                {/* TopMenu  */}
+                <TopMenu toggleMenu={toggleMenu} />
+
+                {/* Chat content */}
+                <main className="content ml-[250px] mt-[60px] p-[20px] h-[calc(100vh-60px)] overflow-y-auto pb-[100px] transition-all duration-300 ease-in-out">
+                    <div className={`flex flex-col items-center w-full h-full  transition-all duration-300 ease-in-out`}>
                         <div className={`flex justify-center text-5xl ${messages.length > 0 ? 'hidden' : 'block'} mx-auto`}>
                             <span className="text-[#fa6f73] font-['poppins'] font-bold">Org</span>
                             <span className="text-[#a1b3ff] font-extrabold font-['poppins']">//</span>
@@ -356,7 +377,7 @@ const MainChat: React.FC = () => {
 
                         {messages.length === 0 && <CallToActionItems messages={messages} handleSubmitCustom={handleSubmitCustom} />}
 
-                        <div className="flex flex-1 w-full md:w-[830px] mx-auto pb-20 overflow-hidden">
+                        <div className="flex flex-1 w-full md:w-[830px] overflow-auto">
                             <div className="flex flex-col space-y-10 justify-items-end overflow-auto w-full">
                                 {/* Chat messages */}
                                 <ChatMessages messages={messages} markdownComponents={markdownComponents} />
@@ -372,72 +393,25 @@ const MainChat: React.FC = () => {
                                 )}
 
                                 <div ref={messagesEndRef} />
-
-
-                                {/* Input area */}
-                                <div className="flex justify-center left-0 align-middle w-full mx-auto bottom-6 fixed">
-                                    <form onSubmit={handleSubmit} className="flex flex-row shadow-md bg-[#F5F5F5] rounded-xl justify-center w-full md:w-[830px] p-6">
-                                        <button
-                                            type="submit"
-                                            className="text-white rounded-full h-10 w-10 justify-center flex items-center focus:outline-none"
-                                            disabled={isLoading}
-                                        >
-                                            <img src={uploadFile} alt="File upload" />
-                                        </button>
-
-                                        <textarea
-                                            value={inputValue}
-                                            onChange={(e) => {
-                                                const newValue = e.target.value;
-                                                const newLines = newValue.split('\n').length;
-                                                const maxLines = 3;
-                                                const minHeight = 30;
-                                                const lineHeight = 24;
-                                                const newHeight = Math.min(newLines * lineHeight, maxLines * lineHeight);
-                                                setInputValue(newValue);
-                                                e.target.style.height = `${Math.max(newHeight, minHeight)}px`;
-                                            }}
-
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter' && !e.shiftKey) {
-                                                    handleSubmit(e);
-                                                }
-                                            }}
-                                            className="flex-1 bg-[#F5F5F5] text-gray-700 focus:outline-none p-2 text-xl"
-                                            placeholder="Type your message..."
-                                            rows={1}
-                                            style={{ resize: 'none', lineHeight: '24px', minHeight: '36px' }}
-                                            disabled={isLoading}
-                                        />
-
-                                        {(abortControllerRef.current && isLoading) && (
-                                            <button
-                                                type="submit"
-                                                onClick={(e) => handleAbort(e)}
-                                                className="text-white rounded-full h-10 w-10 justify-center flex items-center focus:outline-none"
-                                            >
-                                                <div className="w-4 h-4 bg-black" />
-                                            </button>
-                                        )}
-                                        {!abortControllerRef.current && (
-                                            <button
-                                                type="submit"
-                                                className={`text-white rounded-full h-10 w-10 justify-center flex items-center focus:outline-none ${isLoading && 'cursor-not-allowed'}`}
-                                            >
-                                                {inputValue && !isLoading && <img src={sendMessage} className="w-4" alt="Send" />}
-                                            </button>
-                                        )}
-                                    </form>
-                                </div>
                             </div>
 
                         </div>
                     </div>
+
                 </main>
+
+                {/* Chat box*/}
+                <ChatBox
+                    inputValue={inputValue}
+                    setInputValue={setInputValue}
+                    isLoading={isLoading}
+                    handleSubmit={handleSubmit}
+                    handleAbort={handleAbort}
+                    abortControllerRef={abortControllerRef} />
+
             </div>
         </div>
     );
 };
-
 
 export default MainChat;

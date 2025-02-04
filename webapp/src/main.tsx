@@ -10,6 +10,7 @@ import store from './store';
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
+
       <ToastContainer
         position="top-right"
         autoClose={5000}

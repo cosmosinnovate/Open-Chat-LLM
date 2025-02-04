@@ -153,7 +153,7 @@ class ProdConfig(Config):
             'ELASTICSEARCH_PASSWORD': os.environ.get('ELASTICSEARCH_PASSWORD'),
             'ELASTICSEARCH_USERNAME': os.environ.get('ELASTICSEARCH_USERNAME'),
             'ELASTICSEARCH_URL': os.environ.get('ELASTICSEARCH_URL'),
-            'ELASTICSEARCH_INDEX': os.environ.get('ELASTICSEARCH_INDEX', 'documents'),  # Add to validation with default
+            'ELASTICSEARCH_INDEX': os.environ.get('ELASTICSEARCH_INDEX', 'org_pedia'),  # Add to validation with default
             # 'REDIS_URL': os.environ.get('REDIS_URL')
         }
         validate_env_vars(prod_vars, 'Production')
@@ -196,12 +196,12 @@ class DevConfig(Config):
             'DATABASE_PASSWORD': DATABASE_PASSWORD,
             'DATABASE_HOST': DATABASE_HOST,
             'DATABASE_NAME': DATABASE_NAME,
-            'ELASTICSEARCH_HOST': ELASTICSEARCH_HOST,
-            'ELASTICSEARCH_USER': ELASTICSEARCH_USER,
-            'ELASTICSEARCH_PASSWORD': ELASTICSEARCH_PASSWORD,
-            'ELASTICSEARCH_USERNAME': ELASTICSEARCH_USERNAME,
-            'ELASTICSEARCH_URL': ELASTICSEARCH_URL,
-            'ELASTICSEARCH_INDEX': os.environ.get('ELASTICSEARCH_INDEX', 'documents'),  # Add to validation with default
+            'ELASTICSEARCH_HOST': os.environ.get('ELASTICSEARCH_HOST'),
+            'ELASTICSEARCH_USER': os.environ.get('ELASTICSEARCH_USER'),
+            'ELASTICSEARCH_PASSWORD': os.environ.get('ELASTICSEARCH_PASSWORD'),
+            'ELASTICSEARCH_USERNAME': os.environ.get('ELASTICSEARCH_USERNAME'),
+            'ELASTICSEARCH_URL': os.environ.get('ELASTICSEARCH_URL'),
+            'ELASTICSEARCH_INDEX': os.environ.get('ELASTICSEARCH_INDEX', 'org_pedia'),  # Add to validation with default
             'SECRET_KEY': os.environ.get('SECRET_KEY'),
         }
         validate_env_vars(dev_vars, 'Development')

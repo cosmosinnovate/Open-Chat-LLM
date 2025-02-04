@@ -358,12 +358,12 @@ const MainChat: React.FC = () => {
             />
 
             {/* Main content */}
-            <div className="flex-1 flex flex-col items-center w-full h-full">
+            <div className="flex-1 flex flex-col items-center w-full h-full transition-all duration-300 ease-in-out">
                 {/* TopMenu  */}
                 <TopMenu toggleMenu={toggleMenu} />
 
                 {/* Chat content */}
-                <main className="content ml-[250px] mt-[60px] p-[20px] h-[calc(100vh-60px)] overflow-y-auto pb-[100px] transition-all duration-300 ease-in-out">
+                <main className="content ml-[250px] mt-[60px] p-[20px] h-[calc(100vh-60px)] pb-[100px] transition-all duration-300 ease-in-out">
                     <div className={`flex flex-col items-center w-full h-full  transition-all duration-300 ease-in-out`}>
                         <div className={`flex justify-center text-5xl ${messages.length > 0 ? 'hidden' : 'block'} mx-auto`}>
                             <span className="text-[#fa6f73] font-['poppins'] font-bold">Org</span>
@@ -377,8 +377,8 @@ const MainChat: React.FC = () => {
 
                         {messages.length === 0 && <CallToActionItems messages={messages} handleSubmitCustom={handleSubmitCustom} />}
 
-                        <div className="flex flex-1 w-full md:w-[830px] overflow-auto">
-                            <div className="flex flex-col space-y-10 justify-items-end overflow-auto w-full">
+                        <div className="flex flex-1">
+                            <div className="flex flex-col space-y-10 justify-items-end w-full">
                                 {/* Chat messages */}
                                 <ChatMessages messages={messages} markdownComponents={markdownComponents} />
                                 {isLoading && (

@@ -16,11 +16,12 @@ interface SideMenuProps {
 
 const SideMenu: React.FC<SideMenuProps> = ({ selectedChatService, handleSelectedChatService }) => {
   const navigate = useNavigate()
-
   const dispatch: AppDispatch = useAppDispatch();
   const user = useAppSelector((state: RootState) => state.auth.user);
   useFetchHook(dispatch, user);
   const { chat } = useAppSelector((select: RootState) => select)
+
+  console.log(user?.photo_url)
 
   const logUserOut = () => {
     dispatch(logoutUser())
@@ -29,8 +30,13 @@ const SideMenu: React.FC<SideMenuProps> = ({ selectedChatService, handleSelected
 
   return (
     <div className={`sidebar fixed left-0 top-0 w-[250px] h-[100vh] bg-[#fafafa] text-[#242d48] p-6 z-3 transition-all duration-300 ease-in-out`}>
-      <nav className="overflow-y-auto">
+      <nav className="flex flex-col h-full justify-between">
         <div className="block">
+          <div>
+            {/* <img src={user?.photo_url}/> */}
+            <label>{user?.display_name}</label>
+          </div>
+
           {/* LLM Selection */}
           <div>
             <label>Select LLM Service</label>

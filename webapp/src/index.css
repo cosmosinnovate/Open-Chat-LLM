@@ -16,11 +16,12 @@ body.sidebar-collapsed .sidebar {
   left: -250px;
 }
 
+
 body.sidebar-collapsed .topbar,
 body.sidebar-collapsed .content,
 body.sidebar-collapsed .chat-box {
-  left: 0;
-  margin-left: 0;
+  left: 0 !important;
+  margin-left: 0 !important;
 }
 
 @keyframes fadeIn {

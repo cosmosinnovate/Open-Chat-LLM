@@ -5,7 +5,6 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SideMenu from '../component/SideMenu';
-import userAssistant from '../assets/userAssistant.png';
 import { baseURL } from '../service';
 import { RootState } from '../store';
 import { useAppSelector } from '../hooks';
@@ -16,6 +15,7 @@ import CallToActionItems from '../component/CTA';
 import ChatMessages from '../component/ChatMessageList';
 import TopMenu from '../component/TopMenu';
 import ChatBox from '../component/ChatBox';
+import { MessageSquareTextIcon } from 'lucide-react';
 
 const MainChat: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -145,22 +145,32 @@ const MainChat: React.FC = () => {
 
         try {
 
-            let response: Response;
-            switch (selectedChatService) {
-                case 'llama3.2':
-                    response = await fetch(`${baseURL}/chats`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${user?.access_token}`
-                        },
-                        body: JSON.stringify({ messages: [...messages, userMessage] }),
-                        signal,
-                    });
-                    break;
-                default:
-                    throw new Error(`Unknown chat service: ${selectedChatService}`);
-            }
+            
+            // switch (selectedChatService) {
+            //     case 'llama3.2':
+            //         response = await fetch(`${baseURL}/chats`, {
+            //             method: 'POST',
+            //             headers: {
+            //                 'Content-Type': 'application/json',
+            //                 'Authorization': `Bearer ${user?.access_token}`
+            //             },
+            //             body: JSON.stringify({ messages: [...messages, userMessage] }),
+            //             signal,
+            //         });
+            //         break;
+            //     default:
+            //         throw new Error(`Unknown chat service: ${selectedChatService}`);
+            // }
+   
+            const response = await fetch(`${baseURL}/chats`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user?.access_token}`
+                },
+                body: JSON.stringify({ messages: [...messages, userMessage] }),
+                signal,
+            });
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -229,7 +239,7 @@ const MainChat: React.FC = () => {
         inputValue,
         isLoading,
         messages,
-        selectedChatService,
+        // selectedChatService,
         startNewChat,
         updateChat,
         chatId,
@@ -375,18 +385,15 @@ const MainChat: React.FC = () => {
                         <div className="flex flex-1">
                             <div className="flex flex-col space-y-10 justify-items-end w-full">
                                 {/* Chat messages */}
-                                <ChatMessages messages={messages} markdownComponents={markdownComponents} />
                                 {isLoading && (
                                     <div className="flex items-start p-4">
-                                        <div className="flex-shrink-0 w-8 h-8 mr-4">
-                                            <img src={userAssistant} alt="Assistant" className="w-full h-full rounded-full" />
-                                        </div>
                                         <div className="flex flex-col flex-grow">
                                             <div className="text-gray-700"></div>
+                                            <MessageSquareTextIcon />
                                         </div>
                                     </div>
                                 )}
-
+                                <ChatMessages messages={messages} markdownComponents={markdownComponents} />
                                 <div ref={messagesEndRef} />
                             </div>
 

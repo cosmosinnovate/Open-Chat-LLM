@@ -20,15 +20,14 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({ messages, markdo
       {message.role !== 'user' && (
         <div className='mb-4 flex-col'>
           <img src={userAssistant} alt="User" className="w-8 h-8 rounded-full"></img>
-          {!message.content && <p>...</p>}
+          {!message.content && <p>Thinking...</p>}
         </div>
       )}
 
       <div className={`mb-4 ${message.role === 'user'
           ? 'flex max-w-max p-3 bg-gray-200 text-black rounded-2xl top-0'
           : 'text-gray-500 rounded-lg'
-          }`}
-      >
+          }`}>
         {message.role === 'user' ? (
           message.content
         ) : (
@@ -39,6 +38,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({ messages, markdo
             {message.content}
           </ReactMarkdown>
         )}
+        
       </div>
     </div>
   );

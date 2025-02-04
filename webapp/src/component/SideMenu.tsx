@@ -12,7 +12,7 @@ interface SideMenuProps {
   handleSelectedChatService: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   isOpen: boolean;
   toggleMenu: () => void;
-  className?: string; // Add className prop
+  className?: string;
 }
 
 const SideMenu: React.FC<SideMenuProps> = () => {
@@ -34,7 +34,11 @@ const SideMenu: React.FC<SideMenuProps> = () => {
 
           <div className='p-4'>
             {/* <img src={user?.photo_url}/> */}
-            <label>{user?.display_name}</label>
+            <div className="flex flex-row">
+                <span className="text-[#fa6f73] font-['poppins'] font-bold">Org</span>
+                <span className="text-[#a1b3ff] font-extrabold font-['poppins']">//</span>
+                <span className="text-[#a1b3ff] font-bold">Pedia</span>
+            </div>
           </div>
 
           {/* LLM Selection */}
@@ -52,7 +56,7 @@ const SideMenu: React.FC<SideMenuProps> = () => {
           */}
 
           {/* Scrollable Chat History */}
-          <div className="mt-4 flex flex-col h-[calc(100vh-280px)]"> {/* Adjusted height calculation */}
+          <div className="mt-4 flex flex-col h-[calc(100vh-180px)]"> {/* Adjusted height calculation */}
             <div className='mb-4 px-4'>Today</div>
             <div className="flex-1 overflow-y-auto px-2"> {/* Added padding for scrollbar */}
               {chat.chat ? chat.chat.map((m: MessageResponse) => (
@@ -64,12 +68,18 @@ const SideMenu: React.FC<SideMenuProps> = () => {
           </div>
         </div>
 
-        {/* Logout Button */}
-        <div className="text-sm font-bold mb-10 cursor-pointer hover:text-blue-600 mt-10" onClick={logUserOut}>
-          Log out
+        {/* Make this open a  */}
+        <div className="border-t flex flex-row align-center items-center gap-2 text-sm font-bold mb-10 cursor-pointer hover:text-blue-600 mt-10 p-4" onClick={logUserOut}>
+          <img 
+              src={user?.photo_url} 
+              alt="Google Profile" 
+              style={{ width: "40px", height: "40px", borderRadius: "50%" }}
+              referrerPolicy="no-referrer"
+            />
+            <p>{user?.display_name}</p>
+
         </div>
       </nav>
-
     </div>
   );
 };

@@ -359,18 +359,13 @@ const MainChat: React.FC = () => {
 
             {/* Main content */}
             <div className="flex-1 flex flex-col items-center w-full h-full transition-all duration-300 ease-in-out">
+                
                 {/* TopMenu  */}
                 <TopMenu toggleMenu={toggleMenu} />
 
                 {/* Chat content */}
                 <main className="content ml-[250px] mt-[60px] p-[20px] h-[calc(100vh-60px)] pb-[100px] transition-all duration-300 ease-in-out">
                     <div className={`flex flex-col items-center w-full h-full  transition-all duration-300 ease-in-out`}>
-                        <div className={`flex justify-center text-5xl ${messages.length > 0 ? 'hidden' : 'block'} mx-auto`}>
-                            <span className="text-[#fa6f73] font-['poppins'] font-bold">Org</span>
-                            <span className="text-[#a1b3ff] font-extrabold font-['poppins']">//</span>
-                            <span className="text-[#a1b3ff] font-bold">Pedia</span>
-                        </div>
-
                         <div className={`font-semibold text-[32px] text-center ${messages.length > 0 ? 'hidden' : 'block'}`}>
                             Unlocking the Potential of Organizational Wisdom
                         </div>

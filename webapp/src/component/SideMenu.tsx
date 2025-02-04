@@ -35,9 +35,9 @@ const SideMenu: React.FC<SideMenuProps> = () => {
           <div className='p-4'>
             {/* <img src={user?.photo_url}/> */}
             <div className="flex flex-row">
-                <span className="text-[#fa6f73] font-['poppins'] font-bold">Org</span>
-                <span className="text-[#a1b3ff] font-extrabold font-['poppins']">//</span>
-                <span className="text-[#a1b3ff] font-bold">Pedia</span>
+                <span className="text-[#fa6f73] font-['poppins'] font-bold">Insight</span>
+                {/* <span className="text-[#a1b3ff] font-extrabold font-['poppins']">//</span> */}
+                <span className="text-[#a1b3ff] font-bold">Core</span>
             </div>
           </div>
 

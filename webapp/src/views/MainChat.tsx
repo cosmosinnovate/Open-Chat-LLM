@@ -13,7 +13,7 @@ import { Message } from '../features/chat/chatSlice';
 import { useNavigate, useParams } from 'react-router-dom';
 import { LLMModels } from '../util/ai_model';
 import CallToActionItems from '../component/CTA';
-import ChatMessages from '../component/ChatMessages';
+import ChatMessages from '../component/ChatMessageList';
 import TopMenu from '../component/TopMenu';
 import ChatBox from '../component/ChatBox';
 

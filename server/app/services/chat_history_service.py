@@ -1,39 +1,74 @@
 from datetime import datetime
+from turtle import title
 from app.repo.chat_repo import ChatHistoryRepository as chat_repo
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class ChatHistoryService:
     @staticmethod
     def create_chat_message(user_id, title, messages):
         """
         Create a new chat message.
-        
+
         Args:
             user_id (str): ID of the user creating the chat
             title (str): Title of the chat
             messages (list): List of message dictionaries with 'role' and 'content'
-            
+
         Returns:
             bool: True if message was saved successfully
         """
-        logger.info(f"Saving chat message for user: {user_id}")
-        chat_repo.save_chat_to_db(
+
+        chat = chat_repo.save_chat_to_db(
             user_id=user_id,
             title=title,
             messages=messages,
         )
-        
+
         logger.info(f"Chat message saved for user: {user_id}")
+
+        return chat
+
+    @staticmethod
+    def delete_chat_history_by_id(chat_id: str, user_id: str):
+        """
+        Delete a chat message.
+
+        Args:
+            chat_id (str): ID of the chat to delete
+            user_id (str): ID of the user deleting the chat
+
+        Returns:
+            bool: True if message was deleted successfully
+        """
+        logger.info(f"Deleting chat message with id: {chat_id} for user: {user_id}")
+        chat_repo.delete_chat_from_db(chat_id, user_id)
         return True
-        
+
+    @staticmethod
+    def update_chat_history_by_id(user_id: str, chat_id: str, title: str, messages: list):
+        """
+        Update a chat message.
+
+        Args:
+            chat_id (str): ID of the chat to update
+            user_id (str): ID of the user updating the chat
+            messages (list): List of message dictionaries with 'role' and 'content'
+
+        Returns:
+            bool: True if message was updated successfully
+        """
+        logger.info(f"Updating chat message with id: {chat_id} for user: {user_id}")
+        chat_repo.update_chat_in_db(user_id, chat_id, title=title, messages=messages)
+        return True
+
     @staticmethod
     def get_user_chats_by_id(user_id):
         """Get all chats for a user"""
-        logger.info(f"Fetching chat history for user: {user_id}")
         return chat_repo.get_user_chats_by_id(user_id)
-        
+
     @staticmethod
     def get_chat_history_by_id(chat_id, user_id):
         """Get a specific chat by ID"""

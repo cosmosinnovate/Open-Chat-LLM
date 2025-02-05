@@ -12,7 +12,7 @@ import { Message } from '../features/chat/chatSlice';
 import { useNavigate, useParams } from 'react-router-dom';
 import { LLMModels } from '../util/ai_model';
 import CallToActionItems from '../component/CTA';
-import ChatMessages from '../component/ChatMessageList'; s
+import ChatMessages from '../component/ChatMessageList'; 
 import TopMenu from '../component/TopMenu';
 import ChatBox from '../component/ChatBox';
 import { MessageSquarePlus } from 'lucide-react';
@@ -31,9 +31,11 @@ const MainChat: React.FC = () => {
   const [copiedCode, setCopiedCode] = useState('');
   const navigate = useNavigate()
 
-  const startNewChat = useCallback(async () => {
+  console.log(messages)
+
+  const createNewChat = useCallback(async () => {
     try {
-      const response = await fetch(`${baseURL}/start-chat`, {
+      const response = await fetch(`${baseURL}/chats/start-chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -45,14 +47,23 @@ const MainChat: React.FC = () => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+
       const data = await response.json();
-      console.log(data)
-      navigate(`/chat/${data.chat_id}`, { replace: true });
+      console.log(data);
+      
+      if (data.chat_id) {
+        window.history.replaceState(null, '', `/o/chat/${data.chat_id}`);
+        navigate(`/o/chat/${data.chat_id}`, { replace: true });
+        // await fetchChats();
+      } else {
+        throw new Error('Chat ID not found in response');
+      }
+
     } catch (error) {
       console.error('Error starting new chat:', error);
       // toast.error('Failed to start a new chat. Please try again.');
     }
-  }, [messages, navigate, user?.access_token]);
+  }, [messages, user?.access_token, navigate]);
 
   const fetchChats = useCallback(async () => {
     try {
@@ -107,14 +118,15 @@ const MainChat: React.FC = () => {
   const updateChat = useCallback(async () => {
     try {
 
+      console.log('Updating chat:', chatId, messages);
       const response = await httpRequest(
         `${baseURL}/chats/${chatId}`,
         JSON.stringify({ messages: messages }),
-        'POST',
+        'PATCH',
         user?.access_token);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response?.ok) {
+        throw new Error(`HTTP error! status: ${response?.status}`);
       }
 
       const fetchedChat = await response.json();
@@ -232,14 +244,14 @@ const MainChat: React.FC = () => {
     if (chatId) {
       await updateChat();
     } else {
-      await startNewChat();
+      createNewChat();
     }
   }, [
     inputValue,
     isLoading,
     messages,
     // selectedChatService,
-    startNewChat,
+    createNewChat,
     updateChat,
     chatId,
     user?.access_token,
@@ -383,7 +395,7 @@ const MainChat: React.FC = () => {
 
             <div className="flex flex-1">
               <div className="flex flex-col space-y-10 justify-items-end w-full">
-                
+
                 {/* Chat messages */}
                 <ChatMessages messages={messages} markdownComponents={markdownComponents} user={user} />
 

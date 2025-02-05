@@ -24,11 +24,23 @@ class ChatHistoryRepository:
             )
             db.session.add(chat)
             db.session.commit()
+            return chat.id
         except Exception as e:
             logger.error(f"Error saving chat: {str(e)}")
             db.session.rollback()
             raise
-        
+       
+    @staticmethod
+    def delete_chat_from_db(chat_id, user_id):
+        try:
+            chat = Chat.query.filter_by(id=chat_id, user_id=user_id).first()
+            db.session.delete(chat)
+            db.session.commit()
+        except Exception as e:
+            logger.error(f"Error deleting chat: {str(e)}")
+            db.session.rollback()
+            raise
+    
     @staticmethod
     def get_chat_history_by_id(chat_id, user_id):
         """Get a specific chat by chat_id and user_id"""
@@ -55,7 +67,6 @@ class ChatHistoryRepository:
     @staticmethod
     def get_user_chats_by_id(user_id):
         """Get all chats for a user"""
-        logger.info(f"Current user ID: {user_id}")
         try:
             chats = Chat.query.filter_by(user_id=user_id).order_by(Chat.created_at.desc()).all()
             chat_list = [chat.to_dict() for chat in chats]
@@ -75,12 +86,16 @@ class ChatHistoryRepository:
             raise
         
     @staticmethod
-    def update_chat(chat_id, title, messages):
+    def update_chat_in_db(user_id: str, chat_id: str, title:str, messages: list):
         try:
-            chat = Chat.query.filter_by(id=chat_id).first()
-            chat.title = title
-            chat.messages = messages
-            db.session.commit()
+            chat = Chat.query.filter_by(id=chat_id, user_id=user_id).first()
+            if chat is None:
+                logger.error(f"Chat not found for chat_id: {chat_id} and user_id: {user_id}")
+                raise ValueError("Chat not found")
+            else:
+                chat.title = title
+                chat.messages = messages
+                db.session.commit()
         except Exception as e:
             print(f"Error updating chat: {e}")
             raise

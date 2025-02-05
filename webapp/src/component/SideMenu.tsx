@@ -43,7 +43,7 @@ const SideMenu: React.FC<SideMenuProps> = () => {
 
           {/* LLM Selection */}
           {/* 
-            <div>
+              <div>
               <label>Select LLM Service</label>
               <select
                 value={selectedChatService}
@@ -58,7 +58,7 @@ const SideMenu: React.FC<SideMenuProps> = () => {
           {/* Scrollable Chat History */}
           <div className="mt-4 flex flex-col h-[calc(100vh-180px)]"> {/* Adjusted height calculation */}
             <div className='mb-4 px-4'>Today</div>
-            <div className="flex-1 overflow-y-auto px-2"> {/* Added padding for scrollbar */}
+            <div className="flex-1 overflow-y-auto px-4"> {/* Added padding for scrollbar */}
               {chat.chat ? chat.chat.map((m: MessageResponse) => (
                 <ChatMessage key={m.id} m={m} />
               )) : (

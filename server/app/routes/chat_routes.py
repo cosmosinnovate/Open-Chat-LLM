@@ -1,3 +1,5 @@
+from turtle import title
+from cv2 import log
 from flask import Blueprint, jsonify, request, Response, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity  # type: ignore
 import json
@@ -25,11 +27,15 @@ def create_chat():
     try:
         data = request.get_json()
         new_chat: ChatHistorySchema = chat_schema.load(data)
+        
+        logger.info(f"Creating chat: {new_chat}")
+        
         current_user = get_jwt_identity()
-        chat_service.create_chat_message(
-            user_id=current_user, title=new_chat.title, messages=new_chat.messages
+        chat_id = chat_service.create_chat_message(
+            user_id=current_user, title=new_chat.title | 'Untitled chat', messages=new_chat.messages
         )
-        return jsonify({"message": "Chat created successfully"}), 201
+        logger.info(f"Chat created successfully: {chat_id}")
+        return jsonify({"message": "Chat created successfully", chat_id: chat_id}), 201
     except Exception as e:
         logger.error(f"An error occurred: {str(e)}")
         return jsonify({"message": "An error occurred during chat creation"}), 500
@@ -41,7 +47,7 @@ def get_user_chats():
     try:
         current_user = get_jwt_identity()
         messages = chat_service.get_user_chats_by_id(current_user)
-        logger.info(f"Fetching chats for user: {current_user}, messages: {messages}")
+
         return jsonify(messages)
     except Exception as e:
         logger.error(f"Error fetching chats: {str(e)}")
@@ -63,6 +69,17 @@ def get_chat(chat_id: str):
         logger.error(f"Error in get_chat: {str(e)}")
         return jsonify({"error": "An error occurred while fetching the chat"}), 500
 
+@chat_history_bp.route("/<string:chat_id>", methods=["DELETE"])
+@jwt_required()
+def delete_chat_history_by_id(chat_id: str):
+    try:
+        current_user = get_jwt_identity()
+        chat_service.delete_chat_history_by_id(chat_id, current_user)
+        
+        return jsonify({"message": "Chat deleted successfully"}), 200
+    except Exception as e:
+        logger.error(f"Error in delete_chat_history_by_id: {str(e)}")
+        return jsonify({"error": "An error occurred while deleting the chat"}), 500
 
 @chat_history_bp.route("/<string:chat_id>", methods=["PATCH"])
 @jwt_required()
@@ -87,8 +104,8 @@ def update_chat(chat_id: str):
                 messages = [messages]
             update_data["messages"] = messages
 
-        updated_chat = chat_service.update_chat_repo(
-            chat_id, current_user, update_data=update_data
+        updated_chat = chat_service.update_chat_history_by_id(
+            current_user, chat_id, title=update_data.get("title"), messages=update_data.get("messages")
         )
         if updated_chat:
             return jsonify(updated_chat), 200

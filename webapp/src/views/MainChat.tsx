@@ -26,7 +26,7 @@ const MainChat: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const [selectedChatService, setSelectedChatService] = useState<LLMModels>('llama3.2');
+  const [selectedChatService, setSelectedChatService] = useState<LLMModels>('deepseek-r1');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [copiedCode, setCopiedCode] = useState('');
   const navigate = useNavigate()
@@ -65,6 +65,8 @@ const MainChat: React.FC = () => {
     }
   }, [messages, user?.access_token, navigate]);
 
+  // Fetch chat history when a chat ID is provided. 
+  // Can we save the chat history in the store? If we do this, during refresh, we can fetch the chat history from the store.
   const fetchChats = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -91,6 +93,7 @@ const MainChat: React.FC = () => {
     }
   }, [chatId, user?.access_token]);
 
+  // Fetch data when the component mounts
   useEffect(() => {
     const loadData = async () => {
       if (chatId) {
@@ -130,7 +133,6 @@ const MainChat: React.FC = () => {
       }
 
       const fetchedChat = await response.json();
-      console.log(fetchedChat);
       setMessages(fetchedChat);
     } catch (error) {
       console.error('Error fetching chat:', error);
@@ -179,7 +181,7 @@ const MainChat: React.FC = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${user?.access_token}`
         },
-        body: JSON.stringify({ messages: [...messages, userMessage] }),
+        body: JSON.stringify({ messages: [...messages, userMessage], model_name: selectedChatService }),
         signal,
       });
 

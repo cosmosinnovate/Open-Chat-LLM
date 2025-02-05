@@ -123,6 +123,7 @@ def chat():
     try:
         data = request.get_json()
         messages = data.get("messages", [])
+        model_name = data.get("model_name", "llama3.2")
         current_user = get_jwt_identity()
 
         if not messages or not isinstance(messages, list):
@@ -253,7 +254,7 @@ def chat():
             try:
                 response = llm_service.generate_chat(
                     model_provider="ollama",
-                    model_name="llama3.2",
+                    model_name=model_name,
                     messages=messages_processing,
                 )
 

@@ -35,8 +35,12 @@ const authSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
+    removeChat: (state, action: PayloadAction<string>) => {
+      state.chat = state.chat.filter((chat) => chat.id !== action.payload);
+    }
   },
+
 });
 
-export const { setChat, setLoading } = authSlice.actions;
+export const { setChat, setLoading, removeChat } = authSlice.actions;
 export default authSlice.reducer;

@@ -5,13 +5,15 @@ import ReactMarkdown, { Components } from 'react-markdown';
 import 'react-toastify/dist/ReactToastify.css';
 import userAssistant from '../assets/userAssistant.png';
 import remarkGfm from 'remark-gfm';
+import { User } from "../features/auth/authSlice";
 
 interface ChatMessagesProps {
   messages: Message[]
+  user: User | null
   markdownComponents: Components
 }
 
-const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({ messages, markdownComponents }) => {
+const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({ messages, markdownComponents, user }) => {
   const messageListRef = useRef<HTMLDivElement>(null);
   const renderMessage = (message: Message, index: number) => (
     <div key={index}
@@ -25,11 +27,19 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({ messages, markdo
       )}
 
       <div className={`mb-4 ${message.role === 'user'
-          ? 'flex max-w-max p-3 bg-gray-200 text-black rounded-2xl top-0'
-          : 'text-gray-500 rounded-lg'
-          }`}>
+        ? 'flex max-w-max  text-black rounded-2xl top-0'
+        : 'text-gray-500 rounded-lg'
+        }`}>
+           
         {message.role === 'user' ? (
-          message.content
+          <div className="flex flex-row gap-4 justify-center items-center">
+             <img src={user?.photo_url} 
+              alt="Google Profile" 
+              style={{ width: "40px", height: "40px", borderRadius: "50%" }}
+              referrerPolicy="no-referrer"/>
+              <p className="text-sm">{message.content}</p>
+
+          </div>
         ) : (
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
@@ -38,13 +48,13 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({ messages, markdo
             {message.content}
           </ReactMarkdown>
         )}
-        
+
       </div>
     </div>
   );
 
   return (
-    <div className="flex md:w-[830px] flex-col justify-items-end overflow-auto" ref={messageListRef}>
+    <div className="flex md:w-[830px] flex-col pb-  0 justify-items-end overflow-auto" ref={messageListRef}>
       {messages.map(renderMessage)}
     </div>
   );

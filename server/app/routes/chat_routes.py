@@ -21,26 +21,6 @@ chat_schema = ChatHistorySchema()
 es = ElasticsearchClientFactory.create_client()
 
 
-@chat_history_bp.route("/start-chat", methods=["POST"])
-@jwt_required()
-def create_chat():
-    try:
-        data = request.get_json()
-        new_chat: ChatHistorySchema = chat_schema.load(data)
-        
-        logger.info(f"Creating chat: {new_chat}")
-        
-        current_user = get_jwt_identity()
-        chat_id = chat_service.create_chat_message(
-            user_id=current_user, title=new_chat.title | 'Untitled chat', messages=new_chat.messages
-        )
-        logger.info(f"Chat created successfully: {chat_id}")
-        return jsonify({"message": "Chat created successfully", chat_id: chat_id}), 201
-    except Exception as e:
-        logger.error(f"An error occurred: {str(e)}")
-        return jsonify({"message": "An error occurred during chat creation"}), 500
-
-
 @chat_history_bp.route("", methods=["GET"])
 @jwt_required()
 def get_user_chats():
@@ -274,9 +254,11 @@ def chat():
                                     "context": context_docs,  # Store references
                                 }
                             )
+                            
+                            # Save the chat history to persistent storage
                             chat_service.create_chat_message(
                                 user_id=current_user,
-                                title=f"Chat: {user_question[:50]}",
+                                title=user_question[:20],
                                 messages=messages,
                             )
                         break

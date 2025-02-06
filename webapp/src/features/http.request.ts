@@ -1,74 +1,48 @@
+type HttpMethod = 'POST' | 'PUT' | 'PATCH' | 'GET' | 'DELETE';
 
-// This file is used to make http requests to the server.
-// I am moving this from all the components that have http requests implemented in them.
-// Change this function to make it generic and reusable for all the components that need to make http requests for PUT | POST | PATCH | DELETE methods.
-export const httpRequest = async (
-  url: string,
-  data: string,
-  method: 'POST' | 'PUT' | 'PATCH' | 'GET' | 'DELETE' = 'POST',
-  accessToken: string | undefined,
-) => {
-  console.log("ACCESS TOKEN: ", accessToken)
-  console.log("URL: ", url)
+interface HttpRequestOptions {
+  url: string;
+  data?: string;
+  method: HttpMethod;
+  accessToken?: string;
+}
+
+export const httpRequest = async ({
+  url,
+  data,
+  method,
+  accessToken
+}: HttpRequestOptions) => {
+  console.log('url:', url, method, accessToken, data);
   try {
-
-    let response: Response;
-    switch (method) {
-      case 'POST':
-        response = await fetch(url, {
-          method: method,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          },
-          body: data
-        });
-        break;
-      case 'PUT':
-        response = await fetch(url, {
-          method: method,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          },
-          body: data
-        });
-        break;
-      case 'PATCH':
-          response = await fetch(url, {
-            method: method,
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${accessToken}`
-            },
-            body: data
-          });
-          break;
-      case 'GET':
-        response = await fetch(url, {
-          method: method,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          },
-        });
-        break;
-      default:
-        console.log("DELETE METHOD")
-        console.log(url)
-        console.log("ACCESS TOKEN TO DELETE A CHAT: ", accessToken)
-        response = await fetch(url, {
-          method: method,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          },
-        });
-        break;
+    const response = await fetchRequest({ url, data, method, accessToken });
+    if (response.ok) {
+      return response;
     }
     return response;
   } catch (error) {
     console.error('Error:', error);
+    throw new Error(`HTTP error! status: ${error}`);
   }
-}
+};
 
+const fetchRequest = async ({
+  url,
+  data,
+  method,
+  accessToken,
+}: HttpRequestOptions) => {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`;
+  }
+
+  return await fetch(url, {
+    method,
+    headers,
+    body: method === 'GET' || method === 'DELETE' ? null : data,
+  });
+};

@@ -55,16 +55,19 @@ const SideMenu: React.FC<SideMenuProps> = () => {
             </div> 
           */}
 
-          {/* Scrollable Chat History */}
-          <div className="mt-4 flex flex-col h-[calc(100vh-180px)]"> {/* Adjusted height calculation */}
+        
+          <div className="mt-4 flex flex-col h-[calc(100vh-180px)]">
+
             <div className='mb-4 px-4'>Today</div>
-            <div className="flex-1 overflow-y-auto px-4"> {/* Added padding for scrollbar */}
-              {chat.chat ? chat.chat.map((m: MessageResponse) => (
-                <ChatMessage key={m.id} m={m} />
+
+            <div className="flex-1 overflow-y-auto px-4"> 
+              {chat.chat ? chat.chat.map((messageResponse: MessageResponse) => (
+                <ChatMessage key={messageResponse.id} messageResponse={messageResponse} />
               )) : (
                 <div className="text-gray-500">No chat history</div>
               )}
             </div>
+            
           </div>
         </div>
 

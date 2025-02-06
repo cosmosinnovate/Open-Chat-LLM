@@ -4,10 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
-import { httpRequest } from "../features/http.request";
 import { useAppSelector } from "../hooks";
 import { RootState } from "../store";
 import { baseURL } from "../service";
+import { httpRequest } from "../features/http.request";
 
 export function ChatMessage({
   messageResponse,
@@ -22,10 +22,9 @@ export function ChatMessage({
 
   const removeChatHistory = async (id: string) => {
     try {
-      const response = await httpRequest(`${baseURL}/chats/${id}`,"",
-        "DELETE",
-        user?.access_token as string
-      );
+      const response = await httpRequest({
+        url: `${baseURL}/chats/${id}`, method: "DELETE",
+        accessToken: user?.access_token});
       if (response?.status === 200) {
         console.log(response);
         dispatch(removeChat(id as string));
@@ -40,14 +39,14 @@ export function ChatMessage({
 
   return (
     <div key={messageResponse?.id}
-      className={`flex p-2 mb-4 items-center hover:bg-gray-200 flex-row justify-between rounded-md cursor-pointer text-gray-600 truncate ${messageResponse?.id === chatId ? "font-italic bg-gray-200" : ""}`}
+      className={`flex p-2 mb-2 items-center h-10 hover:bg-gray-100 flex-row justify-between rounded-md cursor-pointer text-gray-600 truncate ${messageResponse?.id === chatId ? "bg-gray-200" : ""}`}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}>
       <p className="truncate text-[12px] w-full" onClick={() => navigate(`/o/chat/${messageResponse?.id}`)}>
         {messageResponse?.title || "Untitled Chat"}
       </p>
 
-      <div className="flex items-center gap-2">
+
         {hover && messageResponse?.id !== chatId && (
           <Ellipsis
             onClick={async () =>
@@ -63,7 +62,7 @@ export function ChatMessage({
             }
           />
         )}
-      </div>
+
     </div>
   );
 }

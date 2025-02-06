@@ -54,7 +54,6 @@ const SideMenu: React.FC<SideMenuProps> = () => {
               </select>
             </div> 
           */}
-
         
           <div className="mt-4 flex flex-col h-[calc(100vh-180px)]">
 

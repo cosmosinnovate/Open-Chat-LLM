@@ -6,9 +6,9 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SideMenu from "../component/SideMenu";
 import { baseURL } from "../service";
-import { RootState } from "../store";
+import { RootState, useAppDispatch } from "../store";
 import { useAppSelector } from "../hooks";
-import { Message } from "../features/chat/chatSlice";
+import { fetchChatHistory, Message } from "../features/chat/chatSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import { LLMModels } from "../util/ai_model";
 import CallToActionItems from "../component/CTA";
@@ -26,11 +26,11 @@ const MainChat: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const [selectedChatService, setSelectedChatService] =
-    useState<LLMModels>("deepseek-r1");
+  const [selectedChatService, setSelectedChatService] = useState<LLMModels>("deepseek-r1");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [copiedCode, setCopiedCode] = useState("");
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   // Fetch chat history when a chat ID is provided.
   // Can we save the chat history in the store? If we do this, during refresh, we can fetch the chat history from the store.
@@ -209,6 +209,8 @@ const MainChat: React.FC = () => {
           return;
         }
       } finally {
+              dispatch(fetchChatHistory)
+
         setIsLoading(false);
       }
 

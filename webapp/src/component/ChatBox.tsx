@@ -34,8 +34,8 @@ const ChatBox: FC<ChatBoxProps> = ({ inputValue, setInputValue, isLoading, handl
         style={{
           resize: 'none',
           lineHeight: '24px',
-          minHeight: '100px',
-          maxHeight: '400px'
+          minHeight: '64px',
+          maxHeight: '100px'
         }}
         disabled={isLoading}
       />

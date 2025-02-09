@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { logoutUser } from '../features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../hooks';
 import { AppDispatch, RootState } from '../store';
-import { MessageResponse } from '../features/chat/chatSlice';
-import { useFetchHook } from '../hooks/sideMenuHooks';
+import { fetchChatHistory, MessageResponse } from '../features/chat/chatSlice';
 import { ChatMessage } from './ChatMessage';
+import { LucideLoader } from 'lucide-react';
 
 interface SideMenuProps {
   selectedChatService: 'llama3.2' | 'deepseek-r1';
@@ -19,25 +19,34 @@ const SideMenu: React.FC<SideMenuProps> = () => {
   const navigate = useNavigate()
   const dispatch: AppDispatch = useAppDispatch();
   const user = useAppSelector((state: RootState) => state.auth.user);
-  useFetchHook(dispatch, user);
-  const { chat } = useAppSelector((select: RootState) => select)
+
+  useEffect(() => {
+
+    const loadData = async () => {
+      dispatch(fetchChatHistory())
+    }
+    loadData();
+  }, [dispatch])
 
   const logUserOut = () => {
     dispatch(logoutUser())
-    navigate('/')
+    navigate('/', { replace: true })
   }
 
+  const { chat } = useAppSelector((select: RootState) => select)
+
+  console.log(chat)
+
+
   return (
-    <div className={`sidebar fixed left-0 top-0 w-[250px] h-[100vh] bg-[#fafafa] text-[#242d48] z-3 transition-all duration-300 ease-in-out overflow-hidden `}>
+    <div className={`sidebar z-50 fixed left-0 top-0 w-[250px] h-[100vh] bg-[#fafafa] text-[#242d48] z-3 transition-all duration-300 ease-in-out overflow-hidden `}>
       <nav className="flex flex-col h-full justify-between">
         <div className="block">
 
           <div className='p-4'>
-            {/* <img src={user?.photo_url}/> */}
-            <div className="flex flex-row">
-                <span className="text-[#fa6f73] font-['poppins'] font-bold">Insight</span>
-                {/* <span className="text-[#a1b3ff] font-extrabold font-['poppins']">//</span> */}
-                <span className="text-[#a1b3ff] font-bold">Core</span>
+            <div className="flex flex-row text-[22px]">
+                <span className="text-[#fa6f73] font-['poppins'] font-medium">Insight</span>
+                <span className="text-[#a1b3ff] font-bold"> {" "}Core</span>
             </div>
           </div>
 
@@ -57,16 +66,16 @@ const SideMenu: React.FC<SideMenuProps> = () => {
         
           <div className="mt-4 flex flex-col h-[calc(100vh-180px)]">
 
-            <div className='mb-4 px-4'>Today</div>
+            <div className='mb-4 px-4 font-medium'>Today</div>
 
             <div className="flex-1 overflow-y-auto px-4"> 
-              {chat.chat ? chat.chat.map((messageResponse: MessageResponse) => (
+              {chat ? chat.chat.map((messageResponse: MessageResponse) => (
                 <ChatMessage key={messageResponse.id} messageResponse={messageResponse} />
               )) : (
                 <div className="text-gray-500">No chat history</div>
               )}
+              {chat.loading && <LucideLoader/>}
             </div>
-            
           </div>
         </div>
 

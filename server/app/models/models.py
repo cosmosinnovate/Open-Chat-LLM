@@ -40,8 +40,8 @@ class UserModel(db.Model):
             'photo_url': self.photo_url,
             'user_google_id': self.user_google_id,
             'access_token': self.access_token,
-            'created_at': self.created_at.isoformat(),
-            'updated_at': self.updated_at.isoformat(),
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
         }
         
 class ChatHistory(db.Model):
@@ -62,9 +62,9 @@ class ChatHistory(db.Model):
     
     def to_dict(self):
         return {
-            "id": self.id,
-            "user_id": self.user_id,
-            "title": self.title,
-            "messages": self.messages,
-            "created_at": self.created_at.isoformat()
+            'id': self.id,
+            'user_id': self.user_id,
+            'title': self.title,
+            'messages': self.messages,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
         }

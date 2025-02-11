@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { logoutUser } from "../features/auth/authSlice";
+import { logoutUser, User } from "../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../hooks";
 import { AppDispatch, RootState } from "../store";
@@ -18,19 +18,28 @@ interface SideMenuProps {
   className?: string;
 }
 
+
+function useFetchChaHistoryHook(dispatch: AppDispatch, user: User) {
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchChatHistory());
+    }
+  }, [dispatch, user]);
+
+  const { chat } = useAppSelector((select: RootState) => select);
+  
+  console.log(chat);
+
+  return { chat }
+}
+
 const SideMenu: React.FC<SideMenuProps> = ({ clearChatMessageForNew }) => {
   const navigate = useNavigate();
   const dispatch: AppDispatch = useAppDispatch();
   const user = useAppSelector((state: RootState) => state.auth.user);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [showModel, setShowModel] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadData = async () => {
-      dispatch(fetchChatHistory());
-    };
-    loadData();
-  }, [dispatch]);
+  const { chat } = useFetchChaHistoryHook(dispatch, user as User)
 
   const handleEditTitle = (messageId: string) => {
     setEditingMessageId(messageId);
@@ -53,8 +62,6 @@ const SideMenu: React.FC<SideMenuProps> = ({ clearChatMessageForNew }) => {
   const handleUpdateChatTitle = useCallback(async (title: string) => {
       dispatch(updateChatTitle({ chatId: editingMessageId as string, title }))
   },[dispatch, editingMessageId])
-
-  const { chat } = useAppSelector((select: RootState) => select);
 
   return (
     <div className={`sidebar z-50 fixed left-0 top-0 w-[250px] h-[100vh] bg-[#fafafa] text-[#162d48] z-3 transition-all duration-300 ease-in-out overflow-hidden`}>
@@ -112,8 +119,8 @@ const SideMenu: React.FC<SideMenuProps> = ({ clearChatMessageForNew }) => {
           <div className="mt-4 flex flex-col h-full">
             <div className="mb-4 px-4 font-medium">Today</div>
             <div className="flex-1 overflow-y-auto px-4">
-              {chat ? (
-                chat.chat.map((message: MessageResponse) => (
+              {chat?.chat && chat?.chat.length > 0 ? (
+                chat?.chat?.map((message: MessageResponse) => (
                   <ChatMessage
                     key={message.id}
                     messageResponse={message}
@@ -128,7 +135,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ clearChatMessageForNew }) => {
                 <div className="text-gray-500">No chat history</div>
               )}
               <div className="flex justify-center align-middle h-full">
-                {/* {chat.loading && <LucideLoader />} */}
+                {chat.loading && <p>loading</p>}
               </div>
             </div>
           </div>

@@ -26,8 +26,7 @@ const MainChat: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const [selectedChatService, setSelectedChatService] =
-    useState<LLMModels>("deepseek-r1");
+  const [selectedChatService, setSelectedChatService] = useState<LLMModels>("deepseek-r1");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [copiedCode, setCopiedCode] = useState("");
   const navigate = useNavigate();
@@ -87,10 +86,6 @@ const MainChat: React.FC = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // const handleUpdateChatTitle = useCallback(async () => {
-  //   dispatch(updateChatTitle({ chatId: }))
-  // })
-
   const handleSubmit = useCallback(
     async (
       event?: React.FormEvent<
@@ -132,6 +127,7 @@ const MainChat: React.FC = () => {
         }
 
         const reader = response.body?.getReader();
+
         if (!reader) {
           throw new Error("Response body is not readable");
         }
@@ -373,7 +369,7 @@ const MainChat: React.FC = () => {
   return (
     <div className="flex flex-row">
       {/* SideMenu*/}
-      
+
       <SideMenu
         selectedChatService={selectedChatService}
         handleSelectedChatService={handleSelectedChatService}
@@ -383,18 +379,14 @@ const MainChat: React.FC = () => {
       />
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center w-full h-full transition-all duration-300 ease-in-out">
+      <div className="flex-1 md:w-full flex flex-col items-center w-full h-full transition-all duration-300 ease-in-out">
         {/* TopMenu  */}
         <TopMenu toggleMenu={toggleMenu} />
 
         {/* Chat content */}
-        <main className="content ml-[250px] mt-[60px] p-[20px]  mb-[160px] transition-all duration-300 ease-in-out">
-          <div
-            className={`flex flex-col items-center w-full h-full  transition-all duration-300 ease-in-out`}
-          >
-            <div
-              className={`font-semibold text-[32px] text-center ${messages.length > 0 ? "hidden" : "block"}`}
-            >
+        <main className="content ml-[250px] mt-[60px]  mb-[160px] transition-all duration-300 ease-in-out md:w-[900px]">
+          <div className={`flex flex-col items-center h-full  transition-all duration-300 ease-in-out`}>
+            <div className={`font-semibold text-[32px] text-center ${messages.length > 0 ? "hidden" : "block"}`}>
               Unlocking the Potential of Organizational Wisdom
             </div>
 
@@ -402,10 +394,11 @@ const MainChat: React.FC = () => {
               <CallToActionItems
                 messages={messages}
                 handleSubmitCustom={handleSubmitCustom}
+                user={user}
               />
             )}
 
-            <div className="flex flex-1">
+            <div className="flex flex-1 md:w-[900px] w-full p-5">
               <div className="flex flex-col space-y-10 justify-items-end w-full font-regular text-[14px]">
                 {/* Chat messages */}
                 <ChatMessages

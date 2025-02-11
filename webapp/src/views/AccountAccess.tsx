@@ -4,6 +4,7 @@ import { setUser, User } from "../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebaseConfig"; // Import your firebase configuration
 import { baseURL } from "../service";
+import { fetchChatHistory } from "../features/chat/chatSlice";
 
 
 const AccountAccess = () => {
@@ -46,8 +47,10 @@ const AccountAccess = () => {
                     access_token: data.user.access_token,
                     user_google_id: data.user.user_google_id,
                 }
+                localStorage.removeItem("chatId")
                 dispatch(setUser(user));
                 localStorage.setItem('access_token', data.access_token as string);
+                dispatch(fetchChatHistory());
                 navigate("/", {replace: true});
             } else {
                 console.error('Error during sign-in:', data.error);

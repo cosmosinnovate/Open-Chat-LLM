@@ -1,6 +1,7 @@
 from datetime import datetime
 from sqlite3 import OperationalError
 import logging
+from turtle import update
 
 from app.database.db import db
 from app.utils import generate_jwt
@@ -27,7 +28,6 @@ class UserRepository:
         try:
             # Check if user exists
             user = UserModel.query.filter_by(email=user_data.email).first()
-            
             if user:
                 # Existing user, update user data
                 user.display_name = user_data.display_name
@@ -36,7 +36,6 @@ class UserRepository:
                 user.access_token = user_data.access_token
                 user.updated_at = datetime.now()
                 db.session.commit()
-                logger.info(f"Updated existing user: {user.email}")
             else:
                 # New user, create and save user data
                 user = UserModel(
@@ -45,9 +44,9 @@ class UserRepository:
                     photo_url=user_data.photo_url,
                     access_token=user_data.access_token
                 )
-                db.session.add(user)
-                logger.info(f"Created new user: {user.email}")
-            
+                user.created_at = datetime.now()
+                user.updated_at = datetime.now()
+                db.session.add(user)            
             # Commit the changes
             db.session.commit()
             

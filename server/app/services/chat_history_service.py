@@ -1,13 +1,14 @@
 from datetime import datetime
 from app.repo.chat_repo import ChatHistoryRepository as chat_repo
 import logging
+from typing import List
 
 logger = logging.getLogger(__name__)
 
 
 class ChatHistoryService:
     @staticmethod
-    def create_chat_message(user_id: str, title:str, messages: list):
+    def create_chat_message(user_id: str, title: str, messages: list):
         """
         Create a new chat message.
 
@@ -47,7 +48,22 @@ class ChatHistoryService:
         return True
 
     @staticmethod
-    def update_chat_history_by_id(user_id: str, chat_id: str, title: str, messages: list):
+    def update_chat_title(chat_id: str, user_id: str, title: str):
+        """
+        Update chat title
+
+        Args:
+            chat_id (str): ID of chat
+            user_id (str): ID of the user updating the chat
+
+        Returns:
+            bool: True if message updated successfully
+        """
+        chat_repo.update_chat_title(user_id=user_id, chat_id=chat_id, title=title)
+        return True
+
+    @staticmethod
+    def update_chat_history_by_id(user_id: str, chat_id: str, messages: List[object]):
         """
         Update a chat message.
 
@@ -60,7 +76,7 @@ class ChatHistoryService:
             bool: True if message was updated successfully
         """
         logger.info(f"Updating chat message with id: {chat_id} for user: {user_id}")
-        chat_repo.update_chat_in_db(user_id=user_id, chat_id=chat_id, title=title, messages=messages)
+        chat_repo.update_chat_in_db(user_id=user_id, chat_id=chat_id, messages=messages)
         return True
 
     @staticmethod

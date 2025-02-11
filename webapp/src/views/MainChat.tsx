@@ -404,6 +404,7 @@ const MainChat: React.FC = () => {
         handleSelectedChatService={handleSelectedChatService}
         isOpen={isSidebarOpen}
         toggleMenu={toggleSidebar}
+        clearChatMessageForNew={() =>setMessages([])}
       />
 
       {/* Main content */}

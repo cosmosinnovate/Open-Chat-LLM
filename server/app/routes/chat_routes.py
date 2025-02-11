@@ -1,4 +1,3 @@
-from turtle import title
 from cv2 import log
 from flask import Blueprint, jsonify, request, Response, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity  # type: ignore
@@ -6,17 +5,20 @@ import json
 import logging
 from PyPDF2 import PdfReader  # type: ignore
 import os
+from marshmallow import fields, Schema
 
-from app.schemas.schemas import ChatHistorySchema
+from app.schemas.schemas import ChatHistorySchema, UpdateChatMessageSchema
 from app.services.user_service import UserService as user_service
 from app.services.chat_history_service import ChatHistoryService as chat_service
 from app.llms.llm import LLMService as llm_service
 from app.factory.elasticsearch_factory import ElasticsearchClientFactory
 from app.services.elasticsearch_service import ElasticsearchService as es_service
 
+
 logger = logging.getLogger(__name__)
 chat_history_bp = Blueprint("chat", __name__)
 chat_schema = ChatHistorySchema()
+update_chat_message_schema = UpdateChatMessageSchema()
 
 es = ElasticsearchClientFactory.create_client()
 
@@ -49,51 +51,49 @@ def get_chat(chat_id: str):
         logger.error(f"Error in get_chat: {str(e)}")
         return jsonify({"error": "An error occurred while fetching the chat"}), 500
 
+
 @chat_history_bp.route("/<string:chat_id>", methods=["DELETE"])
 @jwt_required()
 def delete_chat_history_by_id(chat_id: str):
     try:
         current_user = get_jwt_identity()
         chat_service.delete_chat_history_by_id(chat_id, current_user)
-        
+
         return jsonify({"message": "Chat deleted successfully"}), 200
     except Exception as e:
         logger.error(f"Error in delete_chat_history_by_id: {str(e)}")
         return jsonify({"error": "An error occurred while deleting the chat"}), 500
 
+
 @chat_history_bp.route("/<string:chat_id>", methods=["PATCH"])
 @jwt_required()
 def update_chat(chat_id: str):
     try:
-        data = request.get_json()
+        data = update_chat_message_schema.load(request.get_json())
         current_user = get_jwt_identity()
-
-        chat = chat_service.get_chat_history_by_id(
-            chat_id=chat_id, user_id=current_user
-        )
-        if not chat:
-            return jsonify({"error": "Chat not found"}), 404
-
-        update_data = {}
-        if "title" in data:
-            update_data["title"] = data["title"]
-
-        if "messages" in data:
-            messages = data.get("messages", [])
-            if not isinstance(messages, list):
-                messages = [messages]
-            update_data["messages"] = messages
-
         updated_chat = chat_service.update_chat_history_by_id(
-            current_user, chat_id, title=update_data.get("title"), messages=update_data.get("messages")
+            current_user, chat_id, messages=data["messages"]
         )
         if updated_chat:
             return jsonify(updated_chat), 200
         else:
-            return jsonify({"error": "Chat not found or update failed"}), 404
+            return jsonify({"error": "Chat not found or update failed"}), 400
     except Exception as e:
         logger.error(f"Error in update_chat route: {str(e)}")
         return jsonify({"error": "An error occurred while updating the chat"}), 500
+
+
+@chat_history_bp.route("/<string:chat_id>/title", methods=["PATCH"])
+def update_chat_title(chat_id: str):
+    current_user_id = get_jwt_identity()
+    data = request.get_json()
+    title = data.get("title", "")
+    updated_title = chat_service.update_chat_title(
+        chat_id=chat_id, user_id=current_user_id, title=title
+    )
+    if updated_title:
+        return jsonify(updated_title), 200
+    return jsonify({"error": "An error has occurred while updating the chat"}), 400
 
 
 # New implementation
@@ -254,7 +254,7 @@ def chat():
                                     "context": context_docs,  # Store references
                                 }
                             )
-                            
+
                             # Save the chat history to persistent storage
                             chat_service.create_chat_message(
                                 user_id=current_user,

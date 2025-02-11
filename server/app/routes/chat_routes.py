@@ -3,9 +3,8 @@ from flask import Blueprint, jsonify, request, Response, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity  # type: ignore
 import json
 import logging
-from PyPDF2 import PdfReader  # type: ignore
+from PyPDF2 import PdfReader
 import os
-from marshmallow import fields, Schema
 
 from app.schemas.schemas import ChatHistorySchema, UpdateChatMessageSchema
 from app.services.user_service import UserService as user_service
@@ -44,7 +43,6 @@ def get_chat(chat_id: str):
         chat = chat_service.get_chat_history_by_id(chat_id, current_user_id)
         if not chat:
             return jsonify({"error": "Chat not found or not authorized"}), 404
-
         return jsonify(chat["messages"]), 200
 
     except Exception as e:
@@ -84,19 +82,25 @@ def update_chat(chat_id: str):
 
 
 @chat_history_bp.route("/<string:chat_id>/title", methods=["PATCH"])
+@jwt_required()
 def update_chat_title(chat_id: str):
-    current_user_id = get_jwt_identity()
-    data = request.get_json()
-    title = data.get("title", "")
-    updated_title = chat_service.update_chat_title(
-        chat_id=chat_id, user_id=current_user_id, title=title
-    )
-    if updated_title:
-        return jsonify(updated_title), 200
-    return jsonify({"error": "An error has occurred while updating the chat"}), 400
+    try:
+        current_user_id = get_jwt_identity()
+        data = request.get_json()
 
+        title = data.get("title", "")
+        updated_title = chat_service.update_chat_title(
+            chat_id=chat_id, user_id=current_user_id, title=title
+        )
+        
+        logger.info(f"Update chat {updated_title}")
+        if updated_title:
+            return jsonify(updated_title), 200
+        return jsonify({"error": "An error has occurred while updating the chat"}), 400
+    except Exception as e:
+        logger.error(f"Error in update_chat route: {str(e)}")
+        return jsonify({"error": "An error occurred while updating the chat"}), 500
 
-# New implementation
 @chat_history_bp.route("", methods=["POST"])
 @jwt_required()
 def chat():
@@ -110,8 +114,6 @@ def chat():
             return jsonify({"error": "Invalid messages format"}), 400
 
         user_message = messages.pop() if messages else None
-        logger.info(f"User message: {user_message}")
-
         if not user_message or user_message.get("role") != "user":
             return jsonify({"error": "Last message must be a user message"}), 400
 
@@ -122,13 +124,11 @@ def chat():
         if not query_embedding:
             return jsonify({"error": "Query processing failed"}), 500
 
-        # Check index status
         index_name = os.getenv("ELASTICSEARCH_INDEX", "org_pedia")
         if not es.indices.exists(index=index_name):
             logger.error(f"Index {index_name} does not exist")
             return jsonify({"error": "No documents have been indexed yet"}), 404
 
-        # Get index stats
         try:
             stats = es.count(index=index_name)["count"]
             doc_count = stats["indices"][index_name]["total"]["docs"]["count"]
@@ -137,9 +137,8 @@ def chat():
         except Exception as e:
             logger.error(f"Failed to get index stats: {str(e)}")
 
-        # Retrieve relevant context with multiple attempts
         context_docs = []
-        min_scores = [0.7, 0.5, 0.3]  # Try progressively lower thresholds
+        min_scores = [0.7, 0.5, 0.3]
 
         for min_score in min_scores:
             context_docs = es_service.search_documents(
@@ -155,9 +154,7 @@ def chat():
                     f"No documents found with min_score {min_score}, trying lower threshold"
                 )
 
-        # Format context for the LLM
         if context_docs:
-            # Format each context document with a numbered section and clear headers
             formatted_contexts = []
             for i, doc in enumerate(context_docs, 1):
                 # Add clear section breaks and headers
@@ -170,26 +167,19 @@ def chat():
 
             logger.info(f"Found {len(context_docs)} relevant context documents")
 
-            # Create a system message that establishes the context
             system_message = {
                 "role": "system",
                 "content": (
                     "You are an AI assistant providing information about documents as a source of truth. "
                     "You have access to documents. "
+                    "When you cannot access a document, you provide a response to your best of ability. "
                     "Do not confuse this with any other companies. "
                     "Only use information from the provided documents. "
                     "Do not add any external knowledge or make assumptions."
                 ),
             }
 
-            # Add the ability for the system to refer to the context
             context_text = f"{system_message['content']}\n\n{context_text}"
-            # Add the ability to use different LLM models for different contexts
-            # For instance when a user asks about a specific product or service of the company and it does not exist in the general documentation
-            # then the system should be able to look for another agents that are specialized in that product or service.
-            # If not it should just use the general know
-
-            # Create a user message with the context and question
             context_message = {
                 "role": "user",
                 "content": (
@@ -199,9 +189,7 @@ def chat():
                 ),
             }
 
-            # Create the messages array for the LLM
             messages_for_llm = [system_message, context_message]
-
             logger.info("Prepared messages for LLM:")
             logger.info(f"1. System message: {system_message['content'][:100]}...")
             logger.info(f"2. Context length: {len(context_text)} characters")
@@ -212,8 +200,9 @@ def chat():
                 {
                     "role": "system",
                     "content": (
-                        "You are an AI assistant providing information about Synasespend AI. "
-                        "You have access to official documentation about this company. "
+                        "You are an AI assistant providing information about documents as a source of truth. "
+                        "You have access to documents. "
+                        "When you cannot access a document, you provide a response to your best of ability. "
                         "Do not confuse this with any other companies. "
                         "Only use information from the provided documents. "
                         "Do not add any external knowledge or make assumptions."
@@ -251,11 +240,9 @@ def chat():
                                 {
                                     "role": "assistant",
                                     "content": full_response,
-                                    "context": context_docs,  # Store references
+                                    "context": context_docs,
                                 }
                             )
-
-                            # Save the chat history to persistent storage
                             chat_service.create_chat_message(
                                 user_id=current_user,
                                 title=user_question[:20],
@@ -275,7 +262,7 @@ def chat():
             headers={
                 "Cache-Control": "no-cache",
                 "Connection": "keep-alive",
-                "X-Accel-Buffering": "no",  # Disable buffering for nginx
+                "X-Accel-Buffering": "no",
             },
         )
 
@@ -294,13 +281,11 @@ def upload_file():
         file = request.files["file"]
         if file.filename == "":
             return jsonify({"error": "No selected file"}), 400
-
-        # First check if it's a text file
+        
         if file.mimetype.startswith("text/"):
             try:
                 content = file.read().decode("utf-8")
             except UnicodeDecodeError:
-                # Try common fallback encodings
                 try:
                     content = file.read().decode("latin-1")
                 except Exception as e:
@@ -312,29 +297,17 @@ def upload_file():
         else:
             return jsonify({"error": f"Unsupported file type: {file.mimetype}"}), 400
 
-        # Clean and validate content
         content = es_service.clean_content(content)
         if not content:
             return jsonify({"error": "Content is empty after cleaning"}), 400
 
-        logger.info(f"Cleaned content length: {len(content)}")
-        logger.info(f"Content preview: {content[:200]}...")
-
-        # Generate embedding
         embedding = llm_service.get_embedding(content)
         if not embedding:
             return jsonify({"error": "Embedding generation failed"}), 500
-
-        logger.info(f"Generated embedding dimensions: {len(embedding)}")
-
-        # Check index status
+        
         index_name = os.getenv("ELASTICSEARCH_INDEX", "documents")
         if es.indices.exists(index=index_name):
             stats = es.count(index=index_name)["count"]
-            doc_count = stats
-            logger.info(f"Current index status: {doc_count} documents")
-
-            # Get and verify mapping
             mapping = es.indices.get_mapping(index=index_name)
             logger.info(f"Current mapping: {mapping}")
         else:

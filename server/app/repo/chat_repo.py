@@ -96,6 +96,7 @@ class ChatHistoryRepository:
             else:
                 chat.title = title
                 db.session.commit()
+            return chat.to_dict();
         except Exception as e:
             logger.error(f"Error updating chat title: {e}")
             db.session.rollback()

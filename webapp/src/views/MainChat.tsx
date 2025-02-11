@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Components } from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { hopscotch } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SideMenu from "../component/SideMenu";
@@ -26,21 +26,21 @@ const MainChat: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const [selectedChatService, setSelectedChatService] = useState<LLMModels>("deepseek-r1");
+  const [selectedChatService, setSelectedChatService] =
+    useState<LLMModels>("deepseek-r1");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [copiedCode, setCopiedCode] = useState("");
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  // Fetch chat history when a chat ID is provided.
-  // Can we save the chat history in the store? If we do this, during refresh, we can fetch the chat history from the store.
   const fetchChats = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await httpRequest({ 
-        url: `${baseURL}/chats/${chatId}`, 
-        method: "GET", 
-        accessToken: user?.access_token});
+      const response = await httpRequest({
+        url: `${baseURL}/chats/${chatId}`,
+        method: "GET",
+        accessToken: user?.access_token,
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -57,22 +57,15 @@ const MainChat: React.FC = () => {
     }
   }, [chatId, user?.access_token]);
 
-  // Fetch data when the component mounts
   useEffect(() => {
     const loadData = async () => {
       const sessionChatId = loadChatState();
-      // The solution is asking for me to retain a chat Id session such that when the user refreshes the page, we can load the chat history using the id.
-      // Solution: We can save the chatId in the local storage and then load it when the component mounts.
-      // We shall start by first checking to see if there is any other session id stored locally.
-      // If there is a session id, we will load the chat history using the id.
-      // and use navigate to load the id in the url.
-
       if (chatId) {
         saveChatState(chatId);
         await fetchChats();
         return;
       }
-      
+
       if (sessionChatId) {
         navigate(`/o/chat/${sessionChatId}`);
         return;
@@ -82,7 +75,6 @@ const MainChat: React.FC = () => {
     loadData();
   }, [chatId, fetchChats, navigate]);
 
-  // figure out if the window is small and then set isSidebarOpen to true
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 1024) {
@@ -95,33 +87,17 @@ const MainChat: React.FC = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // const updateChat = useCallback(async () => {
-  //   try {
-  //     console.log("Updating chat:", chatId, messages);
-  //     const response = await httpRequest({
-  //       url: `${baseURL}/chats/${chatId}`,
-  //       data: JSON.stringify({ messages: messages }),
-  //       method: "PATCH",
-  //       accessToken: user?.access_token,
-  //     });
+  // const handleUpdateChatTitle = useCallback(async () => {
+  //   dispatch(updateChatTitle({ chatId: }))
+  // })
 
-  //     if (!response?.ok) {
-  //       throw new Error(`HTTP error! status: ${response?.status}`);
-  //     }
-
-  //     const fetchedChat = await response.json();
-  //     setMessages(fetchedChat);
-  //   } catch (error) {
-  //     console.error("Error fetching chat:", error);
-  //     toast.error("Failed to fetch chat. Please try again.");
-  //   }
-  // }, [chatId, messages, user?.access_token]);
-
-  const handleSubmit = useCallback(async (
-    event?: React.FormEvent<HTMLFormElement | KeyboardEvent | HTMLTextAreaElement>,
-    inputMessage?: string
+  const handleSubmit = useCallback(
+    async (
+      event?: React.FormEvent<
+        HTMLFormElement | KeyboardEvent | HTMLTextAreaElement
+      >,
+      inputMessage?: string
     ) => {
-
       event?.preventDefault();
       const messageToSend = inputMessage || inputValue;
       if (!messageToSend.trim() || isLoading) return;
@@ -209,22 +185,20 @@ const MainChat: React.FC = () => {
           return;
         }
       } finally {
-              dispatch(fetchChatHistory)
-
+        dispatch(fetchChatHistory);
         setIsLoading(false);
       }
-
       // Find a way to update the chat without creating a new chat. Also make sure to look at the backend code where the chat is created.
       // if (chatId) {
       //   await updateChat();
       // }
-    },[
+    },
+    [
+      dispatch,
       inputValue,
       isLoading,
       messages,
       selectedChatService,
-      // updateChat,
-      // chatId,
       user?.access_token,
     ]
   );
@@ -256,12 +230,10 @@ const MainChat: React.FC = () => {
     });
   };
 
-  // TODO: Save chat state to local storage
   const saveChatState = (chatId: string) => {
     localStorage.setItem("chatId", chatId);
   };
 
-  // TODO: Load chat state from local storage
   const loadChatState = () => {
     const savedData = localStorage.getItem("chatId");
     if (savedData) {
@@ -270,7 +242,6 @@ const MainChat: React.FC = () => {
     return null;
   };
 
-  // TODO:  Remove chat state from local storage when user clicks on new chat button
   const removeChatId = () => {
     localStorage.removeItem("chatId");
   };
@@ -287,13 +258,15 @@ const MainChat: React.FC = () => {
       <h3 className="text-lg font-bold mb-2">{children}</h3>
     ),
     ul: ({ children }) => (
-      <ul className="list-disc list-inside mb-2">{children}</ul>
+      <ul className="list-disc list-item mb-2">{children}</ul>
     ),
     ol: ({ children }) => (
-      <ol className="list-decimal list-inside mb-2">{children}</ol>
+      <ol className="list-disc list-item mb-2">{children}</ol>
     ),
-    li: ({ children }) => <li className="list-inside mb-2">{children}</li>,
-    
+    li: ({ children }) => (
+      <li className="list-disc list-item  mb-2">{children}</li>
+    ),
+
     code: ({ className, children, ...props }) => {
       const match = /language-(\w+)/.exec(className || "");
       const codeContent = String(children).replace(/\n$/, "");
@@ -301,24 +274,25 @@ const MainChat: React.FC = () => {
 
       return match ? (
         <div className="relative">
-          <div className="py-1 px-2 rounded-t-lg font-mono text-xs text-gray-800">
+          –
+          <div className="py-1 font-mono text-xs text-gray-800 bg-[vsLight] p-2 rounded-md border my-2">
             <strong>{language.toUpperCase()}</strong>
+            <SyntaxHighlighter
+              style={hopscotch}
+              language={match[1]}
+              className="rounded-md text-[12px]"
+              customStyle={{ fontSize: "12px" }}
+              PreTag="div"
+            >
+              {codeContent}
+            </SyntaxHighlighter>
+            <button
+              onClick={() => copyToClipboard(codeContent)}
+              className="text-xs bg-gray-800 text-white px-2 py-1 rounded hover:bg-gray-700 transition"
+            >
+              {copiedCode === codeContent ? "Copied!" : "Copy"}
+            </button>
           </div>
-
-          <SyntaxHighlighter
-            style={vscDarkPlus}
-            className="my-2 rounded-lg"
-            language={match[1]}
-            PreTag="div"
-          >
-            {codeContent}
-          </SyntaxHighlighter>
-          <button
-            onClick={() => copyToClipboard(codeContent)}
-            className=" top-2 right-2 text-xs bg-gray-800 text-white px-2 py-1 rounded hover:bg-gray-700 transition"
-          >
-            {copiedCode === codeContent ? "Copied!" : "Copy"}
-          </button>
         </div>
       ) : (
         <code
@@ -399,12 +373,13 @@ const MainChat: React.FC = () => {
   return (
     <div className="flex flex-row">
       {/* SideMenu*/}
+      
       <SideMenu
         selectedChatService={selectedChatService}
         handleSelectedChatService={handleSelectedChatService}
         isOpen={isSidebarOpen}
         toggleMenu={toggleSidebar}
-        clearChatMessageForNew={() =>setMessages([])}
+        clearChatMessageForNew={() => setMessages([])}
       />
 
       {/* Main content */}
@@ -431,7 +406,7 @@ const MainChat: React.FC = () => {
             )}
 
             <div className="flex flex-1">
-              <div className="flex flex-col space-y-10 justify-items-end w-full">
+              <div className="flex flex-col space-y-10 justify-items-end w-full font-regular text-[14px]">
                 {/* Chat messages */}
                 <ChatMessages
                   messages={messages}
@@ -442,21 +417,20 @@ const MainChat: React.FC = () => {
                 {messages.length > 0 && (
                   <div className="flex justify-center items-center w-full rounded-full sticky top-0 cursor-pointer">
                     <div
-                      className="flex items-center justify-center gap-4 p-2 px-4 bg-white rounded-full border border-gray-300 shadow-md"
+                      className="flex items-center justify-center gap-2 p-2 px-4 bg-white rounded-full border border-gray-300 shadow-md"
                       onClick={() => {
                         navigate("/new");
                         setMessages([]);
                         removeChatId();
                       }}
                     >
-                      <MessageSquarePlus color="gray" size={24} />
-                      <p>New Conversation</p>
+                      <MessageSquarePlus color="gray" size={18} />
+                      <p>New</p>
                     </div>
                   </div>
                 )}
 
                 <div ref={messagesEndRef} />
-
               </div>
             </div>
           </div>

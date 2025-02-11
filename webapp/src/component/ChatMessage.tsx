@@ -8,15 +8,15 @@ import { ClickAwayListener, Popper } from "@material-ui/core";
 export function ChatMessage({
   messageResponse,
   isEditing,
+  showModel,
   onEditTitle,
   onRenameTitle,
-  showModel,
   onShowModel} : {
   messageResponse: MessageResponse;
   isEditing: boolean;
-  onEditTitle: (id: string) => void;
-  onRenameTitle: () => void;
   showModel: string | null;
+  onEditTitle: (id: string) => void;
+  onRenameTitle: (value: string) => void;
   onShowModel: (id: string) => void;
 }) {
   const navigate = useNavigate();
@@ -25,8 +25,6 @@ export function ChatMessage({
   const [hover, setHover] = useState(false);
   const anchorRef = useRef<HTMLDivElement>(null);
   const [titleValue, setTitleValue] = useState(messageResponse.title || "");
-
-  console.log("VALUE OF SHOW MODEL: ", showModel);
 
   const handleDeleteChatHistory = async (id: string) => {
     localStorage.removeItem("chatId");
@@ -40,9 +38,7 @@ export function ChatMessage({
 
   const displayChatTitle = () => {
     return (
-      <div
-        className={`flex w-full p-2 mb-2 items-center h-10 hover:bg-gray-100 flex-row justify-between rounded-md cursor-pointer text-gray-600 truncate ${messageResponse?.id === chatId ? "bg-gray-200" : ""}`}
-      >
+      <div className={`flex w-full p-2 mb-2 items-center h-10 hover:bg-gray-100 flex-row justify-between rounded-md cursor-pointer text-gray-600 truncate ${messageResponse?.id === chatId ? "bg-gray-200" : ""}`}>
         <p
           className="truncate text-[14px] w-full"
           onClick={() => navigate(`/o/chat/${messageResponse?.id}`)}
@@ -74,7 +70,7 @@ export function ChatMessage({
       <div className="text-[14px] w-full mb-2"
         onMouseLeave={() => renameChatTitle()}
       >
-        <ClickAwayListener onClickAway={onRenameTitle}>
+        <ClickAwayListener onClickAway={() => onRenameTitle(titleValue)}>
           <input
             className="flex p-2 w-full rounded-xl border border-blue-100"
             onChange={(e) => handleOnChange(e.target.value)}

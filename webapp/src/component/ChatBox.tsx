@@ -1,4 +1,4 @@
-import { SendIcon, UploadIcon } from "lucide-react";
+import { FileUp, SendIcon } from "lucide-react";
 import { FC } from "react";
 
 interface ChatBoxProps {
@@ -12,7 +12,7 @@ interface ChatBoxProps {
 
 const ChatBox: FC<ChatBoxProps> = ({ inputValue, setInputValue, isLoading, handleAbort, handleSubmit, abortControllerRef }) => {
   return <div className={`chat-box fixed left-[250px] right-0 bottom-0 bg-white px-[20px] flex gap-[10px] z-[4] transition-all duration-300 ease-in-out  pb-10`}>
-    <form onSubmit={handleSubmit} className={`flex flex-col items-center shadow-sm bg-[#F5F5F5] rounded-xl w-full md:w-[900px] mx-auto p-[15px]`}>
+    <form onSubmit={handleSubmit} className={`flex flex-col items-center shadow-sm bg-[#ffffff] rounded-xl w-full md:w-[900px] mx-auto p-[10px] border`}>
       <textarea
         value={inputValue}
         onChange={(e) => {
@@ -28,10 +28,11 @@ const ChatBox: FC<ChatBoxProps> = ({ inputValue, setInputValue, isLoading, handl
             handleSubmit(e);
           }
         }}
-        className="flex-1 bg-[#F5F5F5] text-gray-700 focus:outline-none p-2 text-xl w-full"
+        className="flex-1 bg-[#ffffff] text-gray-700 focus:outline-none p-2 text-xl w-full"
         placeholder="Type your message..."
         rows={1}
         style={{
+          fontSize: '14px',
           resize: 'none',
           lineHeight: '24px',
           minHeight: '64px',
@@ -47,7 +48,7 @@ const ChatBox: FC<ChatBoxProps> = ({ inputValue, setInputValue, isLoading, handl
           className="text-white rounded-full h-10 w-10 justify-center flex items-center focus:outline-none"
           disabled={isLoading}
         >
-          <UploadIcon color='black' />
+          <FileUp color='black' />
         </button>
         {(abortControllerRef.current && isLoading) && (
           <button

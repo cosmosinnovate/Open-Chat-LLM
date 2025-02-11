@@ -59,8 +59,8 @@ class ChatHistoryService:
         Returns:
             bool: True if message updated successfully
         """
-        chat_repo.update_chat_title(user_id=user_id, chat_id=chat_id, title=title)
-        return True
+        updated_chat_title = chat_repo.update_chat_title(user_id=user_id, chat_id=chat_id, title=title)
+        return updated_chat_title
 
     @staticmethod
     def update_chat_history_by_id(user_id: str, chat_id: str, messages: List[object]):

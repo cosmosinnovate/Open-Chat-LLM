@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from "../hooks";
 import { AppDispatch, RootState } from "../store";
 import { fetchChatHistory, MessageResponse, updateChatTitle } from "../features/chat/chatSlice";
 import { ChatMessage } from "./ChatMessage";
-import { LucideLoader, MessageSquarePlus, SearchIcon } from "lucide-react";
+import { MessageSquarePlus, SearchIcon } from "lucide-react";
 
 interface SideMenuProps {
   selectedChatService: "llama3.2" | "deepseek-r1";

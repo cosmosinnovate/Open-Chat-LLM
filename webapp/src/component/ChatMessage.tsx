@@ -38,7 +38,7 @@ export function ChatMessage({
 
   const displayChatTitle = () => {
     return (
-      <div className={`flex w-full p-2 mb-2 items-center h-10 hover:bg-gray-100 flex-row justify-between rounded-md cursor-pointer text-gray-600 truncate ${messageResponse?.id === chatId ? "bg-gray-200" : ""}`}>
+      <div className={`flex w-full p-2 mb-2 items-center hover:bg-gray-100 flex-row justify-between rounded-md cursor-pointer text-gray-600 truncate ${messageResponse?.id === chatId ? "bg-gray-100 h-12" : "h-12"}`}>
         <p
           className="truncate text-[14px] w-full"
           onClick={() => navigate(`/o/chat/${messageResponse?.id}`)}
@@ -67,9 +67,8 @@ export function ChatMessage({
 
   const renameChatTitle = () => {
     return (
-      <div className="text-[14px] w-full mb-2"
-        onMouseLeave={() => renameChatTitle()}
-      >
+      <div className="text-[14px] w-full mb-2" onMouseLeave={() => renameChatTitle()}>
+
         <ClickAwayListener onClickAway={() => onRenameTitle(titleValue)}>
           <input
             className="flex p-2 w-full rounded-xl border border-blue-100"
@@ -99,15 +98,15 @@ export function ChatMessage({
           e.stopPropagation();
           onShowModel("");
         }}
-        className="flex flex-col gap-4 w-40 absolute bg-white rounded-md shadow-md  mt-2 z-50"
+        className="flex flex-col gap-4 w-[100px] absolute bg-white rounded-md shadow-md  mt-2 z-50"
       >
         <ClickAwayListener onClickAway={() => onShowModel("")}>
           <button
             type="button"
-            className="flex flex-row gap-2  text-blue-600 cursor-pointer px-4 pt-4"
+            className="flex text-[12px] flex-row gap-2  text-blue-600 cursor-pointer pl-4 pt-4"
             onClick={() => onEditTitle(messageResponse?.id as string)}
           >
-            <Edit2Icon />
+            <Edit2Icon size={16}/>
             <p>Edit</p>
           </button>
         </ClickAwayListener>
@@ -115,12 +114,12 @@ export function ChatMessage({
         <ClickAwayListener onClickAway={() => onShowModel("")}>
           <button
             type="button"
-            className="flex flex-row gap-2 text-red-600 cursor-pointer hover:bg-gray-50 px-4 pb-4"
+            className="flex text-[12px]  pl-4 flex-row gap-2 text-red-600 cursor-pointer hover:bg-gray-50  pb-4"
             onClick={() =>
               handleDeleteChatHistory(messageResponse?.id as string)
             }
           >
-            <Trash2Icon />
+            <Trash2Icon size={16} />
             <p>Delete</p>
           </button>
         </ClickAwayListener>

@@ -1,17 +1,17 @@
 from cv2 import log
 from flask import Blueprint, jsonify, request, Response, current_app
-from flask_jwt_extended import jwt_required, get_jwt_identity  # type: ignore
+from flask_jwt_extended import jwt_required, get_jwt_identity
 import json
 import logging
 from PyPDF2 import PdfReader
 import os
 
 from app.schemas.schemas import ChatHistorySchema, UpdateChatMessageSchema
-from app.services.user_service import UserService as user_service
 from app.services.chat_history_service import ChatHistoryService as chat_service
 from app.llms.llm import LLMService as llm_service
 from app.factory.elasticsearch_factory import ElasticsearchClientFactory
 from app.services.elasticsearch_service import ElasticsearchService as es_service
+from app.services.data_service import DataService as ds
 
 
 logger = logging.getLogger(__name__)
@@ -297,7 +297,7 @@ def upload_file():
         else:
             return jsonify({"error": f"Unsupported file type: {file.mimetype}"}), 400
 
-        content = es_service.clean_content(content)
+        content = ds.clean_content(content)
         if not content:
             return jsonify({"error": "Content is empty after cleaning"}), 400
 

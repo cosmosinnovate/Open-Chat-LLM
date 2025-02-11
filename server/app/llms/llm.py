@@ -35,7 +35,7 @@ class LLMService:
             return response.json().get("embedding", [])
 
         except Exception as e:
-            print(f"Embedding generation failed: {str(e)}")
+            logger.error(f"Embedding generation failed: {str(e)}")
             return None
 
     @staticmethod

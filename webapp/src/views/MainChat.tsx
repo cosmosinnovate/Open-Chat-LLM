@@ -265,6 +265,7 @@ const MainChat: React.FC = () => {
 
     code: ({ className, children, ...props }) => {
       const match = /language-(\w+)/.exec(className || "");
+      
       const codeContent = String(children).replace(/\n$/, "");
       const language = match ? match[1] : "text";
 
@@ -342,15 +343,11 @@ const MainChat: React.FC = () => {
     tr: ({ children }) => <tr>{children}</tr>,
   };
 
-  const handleSelectedChatService = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  const handleSelectedChatService = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedChatService(event.target.value as "llama3.2" | "deepseek-r1");
   };
 
-  const handleSubmitCustom = (messageContent: string) => {
-    handleSubmit(undefined, messageContent);
-  };
+  const handleSubmitCustom = (messageContent: string) => handleSubmit(undefined, messageContent);
 
   const handleAbort = (event?: React.MouseEvent<HTMLButtonElement>) => {
     event?.preventDefault();
@@ -362,9 +359,7 @@ const MainChat: React.FC = () => {
     }
   };
 
-  const toggleMenu = () => {
-    document.body.classList.toggle("sidebar-collapsed");
-  };
+  const toggleMenu = () => document.body.classList.toggle("sidebar-collapsed");
 
   return (
     <div className="flex flex-row">

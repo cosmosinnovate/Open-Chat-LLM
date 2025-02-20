@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 base_url = "http://localhost:11434"
 
+
 class LLMService:
     """
     Service class for handling interactions with LLMs using static methods.
@@ -17,8 +18,7 @@ class LLMService:
     def get_embedding(text: str) -> list[float]:
         """Generate embeddings using Ollama-compatible model"""
         if not text:
-            return None
-
+            raise Exception("Text cannot be empty")
         try:
             response = httpx.post(
                 f"{base_url}/api/embeddings",
@@ -36,13 +36,13 @@ class LLMService:
 
         except Exception as e:
             logger.error(f"Embedding generation failed: {str(e)}")
-            return None
+            raise Exception(f"Embedding generatin failed: {str(e)}")
 
     @staticmethod
     def openai_chat(prompt):
         """
         TODO: Not implemented yet.
-        
+
         Generate chat using Openai models (e.g., GPT-3, GPT-4) and other models.
         This is a placeholder method for the actual API call to OpenAI.
         It allows api endpoints to be easily swapped out for different providers.

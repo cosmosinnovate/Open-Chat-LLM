@@ -38,7 +38,7 @@ export function ChatMessage({
 
   const displayChatTitle = () => {
     return (
-      <div className={`flex w-full p-2 mb-2 items-center hover:bg-gray-100 flex-row justify-between rounded-md cursor-pointer text-gray-600 truncate ${messageResponse?.id === chatId ? "bg-gray-100 h-12" : "h-12"}`}>
+      <div className={`flex w-full p-2 mb-2 items-center hover:bg-gray-100 flex-row justify-between rounded-md cursor-pointer text-gray-600 truncate ${messageResponse?.id === chatId ? "bg-blue-100 h-12" : "h-12"}`}>
         <p
           className="truncate text-[14px] w-full"
           onClick={() => navigate(`/o/chat/${messageResponse?.id}`)}

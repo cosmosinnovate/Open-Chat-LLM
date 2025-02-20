@@ -33,7 +33,7 @@ function useFetchChaHistoryHook(dispatch: AppDispatch, user: User) {
   return { chat }
 }
 
-const SideMenu: React.FC<SideMenuProps> = ({ clearChatMessageForNew }) => {
+const SideMenu: React.FC<SideMenuProps> = React.memo(({ clearChatMessageForNew }) => {
   const navigate = useNavigate();
   const dispatch: AppDispatch = useAppDispatch();
   const user = useAppSelector((state: RootState) => state.auth.user);
@@ -64,7 +64,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ clearChatMessageForNew }) => {
   },[dispatch, editingMessageId])
 
   return (
-    <div className={`sidebar z-50 fixed left-0 top-0 w-[250px] h-[100vh] bg-[#fafafa] text-[#162d48] z-3 transition-all duration-300 ease-in-out overflow-hidden`}>
+    <div className={`sidebar border-r z-50 fixed left-0 top-0 w-[250px] h-[100vh] bg-[#fafafa] text-[#162d48] z-3 transition-all duration-300 ease-in-out overflow-hidden`}>
       <nav className="flex flex-col h-full justify-between">
 
         <div className="block">
@@ -156,6 +156,6 @@ const SideMenu: React.FC<SideMenuProps> = ({ clearChatMessageForNew }) => {
       </nav>
     </div>
   );
-};
+})
 
 export default SideMenu;

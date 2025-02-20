@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request, Response, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import json
 import logging
-from PyPDF2 import PdfReader
+import fitz  # PyMuPDF
 import os
 
 from app.schemas.schemas import ChatHistorySchema, UpdateChatMessageSchema
@@ -301,9 +301,8 @@ def upload_file():
                 except Exception as e:
                     return jsonify({"error": f"Text decoding failed: {str(e)}"}), 400
         elif file.mimetype == "application/pdf":
-            # Handle PDF files
-            pdf = PdfReader(file)
-            content = "\n".join([page.extract_text() for page in pdf.pages])
+            reader = fitz.open(file)        
+            content = "\n".join([page.get_text() for page in reader.pages])
         else:
             return jsonify({"error": f"Unsupported file type: {file.mimetype}"}), 400
 

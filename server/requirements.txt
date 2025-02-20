@@ -12,7 +12,8 @@ Flask-Migrate
 pymongo
 psycopg2
 chromadb
-PyPDF2
+PyPDF4
+
 
 # LangChain ecosystem (updated versions)
 langchain

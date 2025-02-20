@@ -12,6 +12,7 @@ Flask-Migrate
 pymongo
 psycopg2
 chromadb
+PyPDF2
 
 # LangChain ecosystem (updated versions)
 langchain
@@ -54,3 +55,4 @@ sendgrid
 pytest
 pytest-flask
 pytest-cov
+elasticsearch

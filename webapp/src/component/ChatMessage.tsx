@@ -1,9 +1,8 @@
 import { Edit2Icon, Ellipsis, Trash2Icon } from "lucide-react";
 import { MessageResponse, removeChatHistory } from "../features/chat/chatSlice";
 import { useNavigate, useParams } from "react-router-dom";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAppDispatch } from "../store";
-import { ClickAwayListener, Popper } from "@material-ui/core";
 
 export function ChatMessage({
   messageResponse,
@@ -89,7 +88,7 @@ export function ChatMessage({
     >
       {isEditing ? renameChatTitle() : displayChatTitle()}
 
-      <Popper
+      <CustomPopper
         id={chatId}
         open={showModel === messageResponse.id}
         anchorEl={anchorRef.current}
@@ -123,7 +122,82 @@ export function ChatMessage({
             <p>Delete</p>
           </button>
         </ClickAwayListener>
-      </Popper>
+      </CustomPopper>
     </div>
   );
 }
+
+
+interface PopperProps {
+  id?: string;
+  open: boolean;
+  anchorEl: HTMLElement | null;
+  placement?: string;
+  children: React.ReactNode;
+  className?: string;
+  onClick?: (e: React.MouseEvent) => void;
+}
+
+export const CustomPopper: React.FC<PopperProps> = ({
+  open,
+  anchorEl,
+  children,
+  className,
+  onClick
+}) => {
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    if (anchorEl && open) {
+      const rect = anchorEl.getBoundingClientRect();
+      setPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.right - 100 // Adjust based on your needs
+      });
+    }
+  }, [anchorEl, open]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: `${position.top}px`,
+        left: `${position.left}px`,
+      }}
+      className={className}
+      onClick={onClick}
+    >
+      {children}
+    </div>
+  );
+};
+
+
+interface ClickAwayListenerProps {
+  onClickAway: () => void;
+  children: React.ReactNode;
+}
+
+export const ClickAwayListener: React.FC<ClickAwayListenerProps> = ({
+  onClickAway,
+  children
+}) => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        onClickAway();
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onClickAway]);
+
+  return <div ref={wrapperRef}>{children}</div>;
+};

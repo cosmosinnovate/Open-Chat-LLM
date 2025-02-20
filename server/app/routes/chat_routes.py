@@ -104,6 +104,16 @@ def update_chat_title(chat_id: str):
 @chat_history_bp.route("", methods=["POST"])
 @jwt_required()
 def chat():
+    """
+      Handle the elastic connections an other vector databases separately to make sure that we can isolate them when we don't need them
+      Steps:
+      1. Get the user's query from the request
+      2. Generate an embedding for the query
+      3. Search for relevant documents based on the embedding
+      4. Prepare the context for the LLM by concatenating the relevant documents
+      5. Prepare the LLM input by including the context and user's query
+      6. Generate a response using the LLM
+    """
     try:
         data = request.get_json()
         messages = data.get("messages", [])

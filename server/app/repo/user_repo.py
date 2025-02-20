@@ -1,8 +1,6 @@
 from datetime import datetime
 from sqlite3 import OperationalError
 import logging
-from turtle import update
-
 from app.database.db import db
 from app.utils import generate_jwt
 from app.models.models import UserModel

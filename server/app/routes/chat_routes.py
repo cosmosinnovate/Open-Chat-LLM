@@ -9,7 +9,7 @@ import os
 from app.schemas.schemas import ChatHistorySchema, UpdateChatMessageSchema
 from app.services.chat_history_service import ChatHistoryService as chat_service
 from app.llms.llm import LLMService as llm_service
-from app.factory.elasticsearch_factory import ElasticsearchClientFactory
+from app.factory.vector_factory import DataClientFactory
 from app.services.elasticsearch_service import ElasticsearchService as es_service
 from app.services.data_service import DataService as ds
 
@@ -19,7 +19,7 @@ chat_history_bp = Blueprint("chat", __name__)
 chat_schema = ChatHistorySchema()
 update_chat_message_schema = UpdateChatMessageSchema()
 
-es = ElasticsearchClientFactory.create_client()
+es = DataClientFactory.elasticsearch_client()
 
 
 @chat_history_bp.route("", methods=["GET"])

@@ -1,12 +1,13 @@
 import unittest
 from app.repo.user_repo import UserRepository
-from app.models.models import User
+from app.models.models import UserModel
+
 
 class TestUserRepository(unittest.TestCase):
 
     def setUp(self):
         self.user_repo = UserRepository()
-        self.test_user = User(id="user_id", name="Test User", email="testuser@example.com")
+        self.test_user = UserModel(id="user_id", name="Test User", email="testuser@example.com")
 
     def test_add_user(self):
         self.user_repo.add_user(self.test_user)

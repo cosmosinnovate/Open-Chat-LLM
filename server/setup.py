@@ -74,21 +74,9 @@ def check_database_connection():
         print(e)
         exit(1)
 
-# Step 6: Initialize and apply database migrations
-def setup_database():
-    print("Setting up database...")
-    if not os.path.exists("migrations"):
-        run_command(["flask", "db", "init"])
-        run_command(["flask", "db", "migrate", "-m", "Initial migration"])
-        run_command(["flask", "db", "upgrade"])
-        print("Database setup complete.")
-    else:
-        print("Database already set up.")
-
-# Step 7: Start the server
-def start_server():
-    print("Starting the server...")
-    run_command(["hypercorn", "app.main:app", "--reload"])
+# Step 6: Done
+def _done():
+    print("Done! Now run a migration script before this hypercorn app.main:app --reload")
 
 if __name__ == "__main__":
     print(f"Detected OS: {OS_TYPE}")
@@ -96,7 +84,6 @@ if __name__ == "__main__":
         set_environment_variables()
         create_database()
         check_database_connection()
-        setup_database()
-        start_server()
+        _done()
     except Exception as e:
         print(f"An error occurred: {e}")

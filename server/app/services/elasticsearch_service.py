@@ -3,6 +3,7 @@ from elasticsearch import Elasticsearch
 import logging
 import hashlib
 from datetime import datetime, timezone
+from .data_service import DataService as ds
 
 logger = logging.getLogger(__name__)
 
@@ -44,17 +45,6 @@ class ElasticsearchService:
             raise
 
     @staticmethod
-    def clean_content(content: str) -> str:
-        """Clean content by normalizing whitespace and removing excessive newlines."""
-        if not content:
-            return ""
-        # Replace multiple newlines with a single newline
-        content = '\n'.join(line.strip() for line in content.split('\n') if line.strip())
-        # Replace multiple spaces with a single space
-        content = ' '.join(content.split())
-        return content
-
-    @staticmethod
     def index_document(es: Elasticsearch, content, embedding):
         try:
             index_name = os.getenv("ELASTICSEARCH_INDEX", "documents")
@@ -69,7 +59,7 @@ class ElasticsearchService:
                 raise ValueError(f"Invalid embedding dimensions: {len(embedding)}")
             
             # Clean content
-            cleaned_content = ElasticsearchService.clean_content(content)
+            cleaned_content = ds.clean_content(content)
             if not cleaned_content:
                 raise ValueError("Content is empty after cleaning")
             
@@ -202,7 +192,7 @@ class ElasticsearchService:
                     logger.info(f"Including document with score: {score:.3f}")
                     content = hit["_source"]["content"]
                     # Clean content before returning
-                    cleaned_content = ElasticsearchService.clean_content(content)
+                    cleaned_content = ds.clean_content(content)
                     if cleaned_content:
                         relevant_docs.append(cleaned_content)
                 else:

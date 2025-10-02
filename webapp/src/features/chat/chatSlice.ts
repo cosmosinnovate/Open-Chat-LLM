@@ -12,7 +12,8 @@ export interface MessageResponse {
   id?: string;
   messages?: Message[];
   title?: string;
-  user_id?: string
+  user_id?: string;
+  created_ad: string;
 }
 
 interface MessageState {
@@ -30,35 +31,80 @@ const chatSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(removeChatHistory.pending, (state) => {
-      // remove chat history id.
+
+    builder.addCase(updateChatTitle.pending, (state) => {
       state.loading = true;
     });
+
+    builder.addCase(updateChatTitle.fulfilled, (state, action) => {
+      state.loading = false;
+      state.chat = state.chat.map(item => item.id == action.payload.id ? { ...item, ...action.payload } : item);
+    });
+
+    builder.addCase(updateChatTitle.rejected, (state) => {
+      state.loading = false;
+    });
+
+      // remove chat history
+    builder.addCase(removeChatHistory.pending, (state) => {
+      state.loading = true;
+    });
+
     builder.addCase(removeChatHistory.fulfilled, (state, action) => {
       state.loading = false;
       state.chat = state.chat.filter((chat) => chat.id !== action.payload);
     });
+
     builder.addCase(removeChatHistory.rejected, (state) => {
       state.loading = false;
     });
 
+    // Fetch chat history
     builder.addCase(fetchChatHistory.pending, (state) => {
       state.loading = true;
     });
+
     builder.addCase(fetchChatHistory.fulfilled, (state, action) => {
       state.loading = false;
       state.chat = action.payload;
     });
+
     builder.addCase(fetchChatHistory.rejected, (state) => {
       state.loading = false;
     });
   },
 });
 
+
+export const updateChatTitle = createAsyncThunk("chat/updateChatTitle", 
+  async ({chatId, title }: { chatId: string, title: string}, thunkAPI) => {
+    const user = (thunkAPI.getState() as { auth: { user: { access_token: string }}}).auth.user;
+    try {
+      const response = await httpRequest({
+        url: `${baseURL}/chats/${chatId}/title`,
+        method: "PATCH",
+        accessToken: user?.access_token,
+        data: JSON.stringify({ title })
+      });
+
+      if (response?.status === 200) {
+        const data = await response.json() as MessageResponse;
+        console.log("UPDATE: ", data)
+        return data;
+      } else {
+        toast.error(`Failed to update`);
+        return thunkAPI.rejectWithValue("Failed to update");
+      }
+    } catch (error: unknown) {
+      toast.error((error as Error)?.message || "Something went wrong");
+      return thunkAPI.rejectWithValue("Something went wrong");
+    }
+  }
+)
+
 // Remove chat history
 export const removeChatHistory = createAsyncThunk("chat/removeChatHistory",
   async (id: string, thunkAPI) => {
-
     const user = (thunkAPI.getState() as { auth: { user: { access_token: string } } }).auth.user;
     try {
       const response = await httpRequest({
@@ -68,11 +114,11 @@ export const removeChatHistory = createAsyncThunk("chat/removeChatHistory",
       });
 
       if (response?.status === 200) {
-        toast.success(`Successfully removed history with id ${id}`);
+        toast.success(`Successfully removed`);
         return id; // Return the id on success for further processing if needed
       } else {
-        toast.error(`Failed to remove history with id ${id}`);
-        return thunkAPI.rejectWithValue(`Failed to remove history with id ${id}`); // Reject with a specific error message
+        toast.error(`Failed to remove history`);
+        return thunkAPI.rejectWithValue(`Failed to remove history`); // Reject with a specific error message
       }
     } catch (error: unknown) {
       toast.error((error as Error)?.message || "User not authenticated");

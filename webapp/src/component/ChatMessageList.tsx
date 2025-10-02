@@ -21,28 +21,29 @@ const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({ messages, markdo
         { 
           message.role === "assistant" && (
             <div className="mb-4 flex-col items-start">
-              <img
+              {!message.content && <p>
+                <img
                 src={userAssistant}
                 alt="User"
                 className="w-8 h-8 rounded-full"
               ></img>
-              {!message.content && <p>Thinking...</p>}
+                Thinking...</p>}
             </div>
           )}
 
-        <div className={`mb-4 ${message.role === "user" ? "flex max-w-max  text-black rounded-2xl top-0" : "text-gray-500 rounded-lg"}`}>
+        <div className={`mb-4 justify-end ${message.role === "user" ? "flex  text-black rounded-2xl top-0" : "text-gray-800 rounded-lg"}`}>
 
           {
             message.role === "user" ? (
-              <div className="flex flex-row gap-4 w-full">
-                <div className="flex flex-row gap-4 justify-center items-center bg-gray-200 p-4 rounded-lg">
+              <div className="flex flex-row gap-4">
+                <div className="flex flex-row gap-4 justify-center items-center bg-gray-100 p-4 rounded-2xl">
+                <p className="text-sm">{message.content}</p>
                   <img
                     src={user?.photo_url}
                     alt="Google Profile"
-                    style={{ width: "40px", height: "40px", borderRadius: "50%" }}
+                    style={{ width: "18px", height: "18px", borderRadius: "50%" }}
                     referrerPolicy="no-referrer"
                   />
-                  <p className="text-sm">{message.content}</p>
                 </div>
               </div>
             ) : (

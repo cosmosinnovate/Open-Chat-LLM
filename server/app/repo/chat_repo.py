@@ -5,23 +5,20 @@ import json
 
 logger = logging.getLogger(__name__)
 
+
 class ChatHistoryRepository:
     @staticmethod
     def save_chat_to_db(user_id, title, messages):
         """
         Save a chat to the database.
-        
+
         Args:
             user_id (str): ID of the user creating the chat
             title (str): Title of the chat
             messages (list): List of message dictionaries with 'role' and 'content'
         """
         try:
-            chat = Chat(
-                user_id=user_id, 
-                title=title, 
-                messages=messages
-            )
+            chat = Chat(user_id=user_id, title=title, messages=messages)
             db.session.add(chat)
             db.session.commit()
             return chat.id
@@ -29,7 +26,7 @@ class ChatHistoryRepository:
             logger.error(f"Error saving chat: {str(e)}")
             db.session.rollback()
             raise
-       
+
     @staticmethod
     def delete_chat_from_db(chat_id, user_id):
         try:
@@ -40,7 +37,7 @@ class ChatHistoryRepository:
             logger.error(f"Error deleting chat: {str(e)}")
             db.session.rollback()
             raise
-    
+
     @staticmethod
     def get_chat_history_by_id(chat_id, user_id):
         """Get a specific chat by chat_id and user_id"""
@@ -48,33 +45,37 @@ class ChatHistoryRepository:
             chat = Chat.query.filter_by(id=chat_id, user_id=user_id).first()
             if not chat:
                 return None
-                
+
             chat_dict = chat.to_dict()
             # Ensure messages is always a list
-            if not chat_dict['messages']:
-                chat_dict['messages'] = []
-            elif isinstance(chat_dict['messages'], str):
+            if not chat_dict["messages"]:
+                chat_dict["messages"] = []
+            elif isinstance(chat_dict["messages"], str):
                 try:
-                    chat_dict['messages'] = json.loads(chat_dict['messages'])
+                    chat_dict["messages"] = json.loads(chat_dict["messages"])
                 except json.JSONDecodeError:
                     logger.error(f"Invalid JSON in messages for chat {chat_id}")
-                    chat_dict['messages'] = []
+                    chat_dict["messages"] = []
             return chat_dict
         except Exception as e:
             logger.error(f"Error fetching chat: {str(e)}")
             return None
-    
+
     @staticmethod
     def get_user_chats_by_id(user_id):
         """Get all chats for a user"""
         try:
-            chats = Chat.query.filter_by(user_id=user_id).order_by(Chat.created_at.desc()).all()
+            chats = (
+                Chat.query.filter_by(user_id=user_id)
+                .order_by(Chat.created_at.desc())
+                .all()
+            )
             chat_list = [chat.to_dict() for chat in chats]
             return chat_list
         except Exception as e:
             logger.error(f"Error fetching user chats: {str(e)}")
             return []
-    
+
     @staticmethod
     def delete_chat_by_id(chat_id):
         try:
@@ -82,27 +83,45 @@ class ChatHistoryRepository:
             db.session.delete(chat)
             db.session.commit()
         except Exception as e:
-            print(f"Error deleting chat: {e}")
+            logger.error(f"Error deleting chat: {e}")
             raise
-        
+
     @staticmethod
-    def update_chat_in_db(user_id: str, chat_id: str, title:str, messages: list):
+    def update_chat_title(user_id: str, chat_id: str, title: str):
         try:
             chat = Chat.query.filter_by(id=chat_id, user_id=user_id).first()
             if chat is None:
-                logger.error(f"Chat not found for chat_id: {chat_id} and user_id: {user_id}")
-                raise ValueError("Chat not found")
+                logger.info(f"Chat not found for chat_id: {chat_id}")
+                return ValueError("Chat not found")
             else:
                 chat.title = title
+                db.session.commit()
+            return chat.to_dict();
+        except Exception as e:
+            logger.error(f"Error updating chat title: {e}")
+            db.session.rollback()
+            raise
+
+    @staticmethod
+    def update_chat_in_db(user_id: str, chat_id: str, messages: list):
+        try:
+            chat = Chat.query.filter_by(id=chat_id, user_id=user_id).first()
+            if chat is None:
+                logger.error(
+                    f"Chat not found for chat_id: {chat_id} and user_id: {user_id}"
+                )
+                raise ValueError("Chat not found")
+            else:
                 chat.messages = messages
                 db.session.commit()
         except Exception as e:
-            print(f"Error updating chat: {e}")
+            logger.error(f"Error updating chat: {e}")
+            db.session.rollback()
             raise
-        
+
     @staticmethod
     def delete_chats_by_user_id(user_id):
-        try:            
+        try:
             Chat.query.filter_by(user_id=user_id).delete()
             db.session.commit()
         except Exception as e:

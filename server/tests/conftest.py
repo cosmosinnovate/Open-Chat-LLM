@@ -1,8 +1,8 @@
 # tests/conftest.py
-from app.database import db
 import pytest
-from app import create_app
 import logging
+from app.database import db
+from app import create_app
 
 logger = logging.getLogger(__name__)
 

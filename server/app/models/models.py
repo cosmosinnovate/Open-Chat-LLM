@@ -21,8 +21,8 @@ class UserModel(db.Model):
     email = Column(String, unique=True, index=True)
     photo_url = Column(String)
     access_token = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
     
     def __init__(self, user_google_id=None, display_name=None, email=None, photo_url=None, access_token=None):
         self.user_google_id = user_google_id
@@ -41,7 +41,7 @@ class UserModel(db.Model):
             'user_google_id': self.user_google_id,
             'access_token': self.access_token,
             'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
         }
         
 class ChatHistory(db.Model):
@@ -62,9 +62,9 @@ class ChatHistory(db.Model):
     
     def to_dict(self):
         return {
-            "id": self.id,
-            "user_id": self.user_id,
-            "title": self.title,
-            "messages": self.messages,
-            "created_at": self.created_at.isoformat() if self.created_at else None
+            'id': self.id,
+            'user_id': self.user_id,
+            'title': self.title,
+            'messages': self.messages,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
         }

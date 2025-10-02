@@ -1,103 +1,99 @@
-import React, { useCallback, useEffect } from 'react';
-import sidebarIcon from '../assets/sidebar.png';
+import React, { useEffect } from 'react';
 import { logoutUser } from '../features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
-import { baseURL } from '../service';
 import { useAppDispatch, useAppSelector } from '../hooks';
 import { AppDispatch, RootState } from '../store';
-import { MessageResponse, setChat } from '../features/chat/chatSlice';
+import { fetchChatHistory, MessageResponse } from '../features/chat/chatSlice';
+import { ChatMessage } from './ChatMessage';
+import { LucideLoader } from 'lucide-react';
 
 interface SideMenuProps {
-  selectedChatService: 'ollama' | 'bedrock';
+  selectedChatService: 'llama3.2' | 'deepseek-r1';
   handleSelectedChatService: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   isOpen: boolean;
   toggleMenu: () => void;
+  className?: string;
 }
 
-const SideMenu: React.FC<SideMenuProps> = ({ selectedChatService, handleSelectedChatService, isOpen, toggleMenu }) => {
+const SideMenu: React.FC<SideMenuProps> = () => {
   const navigate = useNavigate()
   const dispatch: AppDispatch = useAppDispatch();
-  const { auth: {user}, chat } = useAppSelector((select: RootState) => select)
+  const user = useAppSelector((state: RootState) => state.auth.user);
 
-  const fetchUserChats = useCallback(async () => {
-    try {
-      const response = await fetch(`${baseURL}/chats`, {
-        headers: {
-          'Content-Type': 'applicaiton/json',
-          'Authorization': `Bearer ${user?.access_token as string}`
-        }
-      })
+  useEffect(() => {
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const fetchedChats: MessageResponse[] = await response.json();
-      console.log(fetchedChats)
-
-      dispatch(setChat(fetchedChats))
-
-    } catch (e) {
-      throw Error(`Something happened: ${e}`)
+    const loadData = async () => {
+      dispatch(fetchChatHistory())
     }
-  }, [dispatch, user?.access_token])
-
-  useEffect(()=>{
-    fetchUserChats()
-  }, [fetchUserChats])
+    loadData();
+  }, [dispatch])
 
   const logUserOut = () => {
     dispatch(logoutUser())
-    navigate('/')
+    navigate('/', { replace: true })
   }
 
+  const { chat } = useAppSelector((select: RootState) => select)
+
+  console.log(chat)
+
+
   return (
-    <div className="fixed z-50">
-      {/* Sidebar Icon - Always visible */}
-      <div className={`fixed top-0 left-0 ml-4 mt-4  cursor-pointer  ${isOpen ? 'hidden' : 'bock'}`} onClick={toggleMenu}>
-        <img src={sidebarIcon} alt="Sidebar Icon" className="w-8 h-8" />
-      </div>
+    <div className={`sidebar z-50 fixed left-0 top-0 w-[250px] h-[100vh] bg-[#fafafa] text-[#242d48] z-3 transition-all duration-300 ease-in-out overflow-hidden `}>
+      <nav className="flex flex-col h-full justify-between">
+        <div className="block">
 
-      {/* Sidebar - Visible only on medium screens and above */}
-      <div className={`h-screen pt-4 bg-gray-50 border-r border-[#d9d9d9] transition-all duration-300 ease-in-out flex-shrink-0 ${isOpen ? 'block w-64' : 'hidden'
-        }`}>
+          <div className='p-4'>
+            <div className="flex flex-row text-[22px]">
+                <span className="text-[#fa6f73] font-['poppins'] font-medium">Insight</span>
+                <span className="text-[#a1b3ff] font-bold"> {" "}Core</span>
+            </div>
+          </div>
 
-        <div className={`top-0 left-0 ml-4   cursor-pointer "`} onClick={toggleMenu}>
-          <img src={sidebarIcon} alt="Sidebar Icon" className="w-8 h-8" />
+          {/* LLM Selection */}
+          {/* 
+              <div>
+              <label>Select LLM Service</label>
+              <select
+                value={selectedChatService}
+                onChange={handleSelectedChatService}
+                className="bg-white border border-gray-200 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 my-2 rounded-md w-full">
+                <option value={"llama3.2"}>LLama3.2</option>
+                <option value={"deepseek-r1"}>DeepSeek-r1</option>
+              </select>
+            </div> 
+          */}
+        
+          <div className="mt-4 flex flex-col h-[calc(100vh-180px)]">
+
+            <div className='mb-4 px-4 font-medium'>Today</div>
+
+            <div className="flex-1 overflow-y-auto px-4"> 
+              {chat ? chat.chat.map((messageResponse: MessageResponse) => (
+                <ChatMessage key={messageResponse.id} messageResponse={messageResponse} />
+              )) : (
+                <div className="text-gray-500">No chat history</div>
+              )}
+              {chat.loading && <LucideLoader/>}
+            </div>
+          </div>
         </div>
 
-        {isOpen && (
-          <nav className="flex flex-col p-4 justify-between h-full">
-            <div>
-              <div>
-                <label className=''>Select LLM Service</label>
-                <select
-                  value={selectedChatService}
-                  onChange={handleSelectedChatService}
-                  className="bg-white border border-gray-200 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 my-2 rounded-md w-full"
-                >
-                  {/* <option value="bedrock">Bedrock</option> */}
-                  <option value="ollama">Ollama</option>
-                </select>
-              </div>
+        {/* Make this open a  */}
+        <div className="border-t flex flex-row align-center items-center gap-2 text-sm font-bold mb-10 cursor-pointer hover:text-blue-600 mt-10 p-4" onClick={logUserOut}>
+          <img 
+              src={user?.photo_url} 
+              alt="Google Profile" 
+              style={{ width: "40px", height: "40px", borderRadius: "50%" }}
+              referrerPolicy="no-referrer"
+            />
+            <p>{user?.display_name}</p>
 
-              <div className='mt-20'>
-                <div className='mb-4'>Today</div>
-                {chat.chat ? chat.chat.map((m: MessageResponse) => (
-                  <div key={m.id} className='p-2 bg-gray-100 h-1 flex flex-1 text-gray-600 cursor-pointer align-middle justify-start justify-items-center' onClick={() => {
-                    navigate(`/c/${m.id}`)
-                  }}>{m?.title}</div>
-                  )) : <div>Empy chat</div>}
-              </div>
-            </div>
-
-
-            <div className="text-sm font-bold mb-10 justify-start bottom-0 self-start cursor-pointer" onClick={logUserOut}>Log out</div>
-          </nav>
-        )}
-      </div>
+        </div>
+      </nav>
     </div>
   );
 };
+
 
 export default SideMenu;

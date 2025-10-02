@@ -1,0 +1,1 @@
+export type LLMModels = "llama3.2" | "deepseek-r1"
